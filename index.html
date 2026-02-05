@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mass Timber Carbon Studio</title>
+  <title>Mass Timber Carbon Studio Pro</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -13,72 +13,94 @@
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand">
-        <div class="brand-badge">MT</div>
+      <div class="brand-wrap">
+        <div class="logo">MT</div>
         <div>
-          <p class="eyebrow">Pfluger Studio Tool</p>
-          <h1>Mass Timber Carbon Studio</h1>
+          <p class="eyebrow">Pfluger Architects</p>
+          <h1>Carbon Studio Pro</h1>
         </div>
       </div>
-      <p class="sidebar-copy">A clean planning interface to estimate embodied carbon, evaluate logistics, and benchmark timber against steel and concrete systems.</p>
-      <ol class="workflow-list">
-        <li><span>1</span>Define project profile</li>
-        <li><span>2</span>Set material & code assumptions</li>
-        <li><span>3</span>Position site and manufacturer</li>
-        <li><span>4</span>Generate carbon comparison</li>
-      </ol>
-      <div class="sidebar-card">
-        <p>Tip</p>
-        <h3>Use accurate supplier coordinates</h3>
-        <small>Drag the map markers to refine transport emissions.</small>
+      <p class="muted">Professional conceptual carbon planning for mass timber projects with logistics and baseline benchmarking.</p>
+      <ul class="steps">
+        <li><span>01</span>Project setup</li>
+        <li><span>02</span>Material assumptions</li>
+        <li><span>03</span>Supply chain map</li>
+        <li><span>04</span>Carbon comparison</li>
+      </ul>
+      <div class="pill-note">
+        <strong>Optional Parameters Ready</strong>
+        <small>Missing inputs can be auto-estimated using building typology defaults.</small>
       </div>
     </aside>
 
-    <main class="content">
-      <section class="top-metrics" aria-label="summary metrics">
-        <article class="metric">
-          <p>Estimated Distance</p>
-          <h2 id="distance-km">0 km</h2>
-        </article>
-        <article class="metric">
-          <p>Mass Timber Carbon</p>
-          <h2 id="timber-total">—</h2>
-        </article>
-        <article class="metric">
-          <p>Savings vs Steel</p>
-          <h2 id="steel-savings">—</h2>
-        </article>
-        <article class="metric">
-          <p>Savings vs Concrete</p>
-          <h2 id="concrete-savings">—</h2>
-        </article>
+    <main class="main">
+      <section class="kpi-grid">
+        <article class="kpi"><p>Distance</p><h2 id="distance-km">0 km</h2></article>
+        <article class="kpi"><p>Mass Timber</p><h2 id="timber-total">—</h2></article>
+        <article class="kpi"><p>vs Steel</p><h2 id="steel-savings">—</h2></article>
+        <article class="kpi"><p>vs Concrete</p><h2 id="concrete-savings">—</h2></article>
       </section>
 
       <section class="workspace">
-        <section class="panel panel-form">
+        <section class="panel">
           <div class="panel-head">
-            <h2>Project Inputs</h2>
-            <p>Populate assumptions for structural concept, sourcing, and code context.</p>
+            <h2>Project Input Studio</h2>
+            <p>Use manual values where known. Leave optional fields blank to auto-approximate.</p>
           </div>
 
           <form id="calculator-form">
             <details open>
-              <summary>Project & Geometry</summary>
+              <summary>Project Profile & Building Type</summary>
               <div class="form-grid">
                 <label>Project name<input name="projectName" type="text" value="New High School Gym" /></label>
-                <label>Building floor plate (m²)<input name="floorPlate" type="number" min="100" step="10" value="3800" required /></label>
-                <label>Number of stories<input name="stories" type="number" min="1" max="50" value="2" required /></label>
-                <label>Building height (m)<input name="height" type="number" min="3" step="0.1" value="14" required /></label>
-                <label>Construction duration (months)<input name="constructionMonths" type="number" min="1" max="60" value="14" required /></label>
+                <label>Building typology
+                  <select name="buildingType">
+                    <option value="education" selected>Education</option>
+                    <option value="office">Office</option>
+                    <option value="residential">Residential</option>
+                    <option value="civic">Civic / Community</option>
+                    <option value="industrial">Industrial</option>
+                  </select>
+                </label>
+                <label>Occupancy estimate (people)
+                  <input name="occupancy" type="number" min="10" step="10" value="900" />
+                </label>
+                <label>Conditioned floor area known?
+                  <select name="floorAreaMode">
+                    <option value="manual" selected>Yes, I will provide it</option>
+                    <option value="estimate">No, estimate from typology</option>
+                  </select>
+                </label>
+                <label>Building floor plate (m²) <span class="optional">optional</span>
+                  <input data-optional="true" name="floorPlate" type="number" min="100" step="10" value="3800" />
+                </label>
+                <label>Number of stories <span class="optional">optional</span>
+                  <input data-optional="true" name="stories" type="number" min="1" max="50" value="2" />
+                </label>
+                <label>Building height (m) <span class="optional">optional</span>
+                  <input data-optional="true" name="height" type="number" min="3" step="0.1" value="14" />
+                </label>
+                <label>Construction duration (months) <span class="optional">optional</span>
+                  <input data-optional="true" name="constructionMonths" type="number" min="1" max="60" value="14" />
+                </label>
+              </div>
+              <div class="actions-row">
+                <button type="button" id="estimate-btn" class="ghost">Auto-estimate Building Quantities</button>
               </div>
             </details>
 
             <details open>
-              <summary>Timber & Hybrid Composition</summary>
+              <summary>Timber, Hybrid, and Envelope Parameters</summary>
               <div class="form-grid">
-                <label>CLT use in superstructure (%)<input name="cltUsePercent" type="number" min="0" max="100" value="70" required /></label>
-                <label>CLT volume (m³)<input name="cltVolume" type="number" min="0" step="1" value="1400" required /></label>
-                <label>Glulam volume (m³)<input name="glulamVolume" type="number" min="0" step="1" value="350" required /></label>
+                <label>CLT use in superstructure (%)
+                  <input name="cltUsePercent" type="number" min="0" max="100" value="70" />
+                </label>
+                <label>CLT volume (m³) <span class="optional">optional</span>
+                  <input data-optional="true" name="cltVolume" type="number" min="0" step="1" value="1400" />
+                </label>
+                <label>Glulam volume (m³) <span class="optional">optional</span>
+                  <input data-optional="true" name="glulamVolume" type="number" min="0" step="1" value="350" />
+                </label>
                 <label>Hybrid construction type
                   <select name="hybridType">
                     <option value="none">No hybrid systems</option>
@@ -87,18 +109,39 @@
                     <option value="podium">Concrete podium + timber upper levels</option>
                   </select>
                 </label>
-                <label>Hybrid steel share (%)<input name="hybridSteelPercent" type="number" min="0" max="100" value="20" required /></label>
-                <label>Hybrid concrete share (%)<input name="hybridConcretePercent" type="number" min="0" max="100" value="10" required /></label>
-                <label>Construction waste factor (%)<input name="wasteFactor" type="number" min="0" max="25" value="5" required /></label>
+                <label>Hybrid steel share (%) <span class="optional">optional</span>
+                  <input data-optional="true" name="hybridSteelPercent" type="number" min="0" max="100" value="20" />
+                </label>
+                <label>Hybrid concrete share (%) <span class="optional">optional</span>
+                  <input data-optional="true" name="hybridConcretePercent" type="number" min="0" max="100" value="10" />
+                </label>
+                <label>Construction waste factor (%) <span class="optional">optional</span>
+                  <input data-optional="true" name="wasteFactor" type="number" min="0" max="25" value="5" />
+                </label>
+                <label>Required fire rating (hours) <span class="optional">optional</span>
+                  <input data-optional="true" name="fireRating" type="number" min="1" max="6" step="0.5" value="2" />
+                </label>
+                <label>Insulation level (R-value) <span class="optional">optional</span>
+                  <input data-optional="true" name="insulationR" type="number" min="5" step="1" value="30" />
+                </label>
               </div>
             </details>
 
-            <details>
-              <summary>Supply Chain, Energy & Codes</summary>
+            <details open>
+              <summary>Cities, Manufacturers, Energy, and Codes</summary>
               <div class="form-grid">
-                <label>Manufacturer name<input name="manufacturerName" type="text" value="Example Timber Co." /></label>
-                <label>Manufacturer region<input name="manufacturerRegion" type="text" value="British Columbia, Canada" /></label>
-                <label>Project site city/region<input name="projectRegion" type="text" value="Austin, TX, USA" /></label>
+                <label>Project site (major US city)
+                  <select id="project-city" name="projectCity"></select>
+                </label>
+                <label>Timber manufacturer (major US provider)
+                  <select id="manufacturer-select" name="manufacturerName"></select>
+                </label>
+                <label>Project site city/region <span class="optional">optional override</span>
+                  <input data-optional="true" name="projectRegion" type="text" placeholder="Austin, TX" />
+                </label>
+                <label>Manufacturer region <span class="optional">optional override</span>
+                  <input data-optional="true" name="manufacturerRegion" type="text" placeholder="Spokane, WA" />
+                </label>
                 <label>Average logistics mode
                   <select name="transportMode">
                     <option value="truck" selected>Truck</option>
@@ -106,43 +149,44 @@
                     <option value="ship">Ship</option>
                   </select>
                 </label>
-                <label>Grid carbon intensity (kgCO₂e/kWh)<input name="gridIntensity" type="number" min="0" step="0.01" value="0.35" required /></label>
-                <label>Renewable electricity for fabrication (%)<input name="renewableShare" type="number" min="0" max="100" value="35" required /></label>
-                <label>National code<input name="nationalCode" type="text" value="IBC 2024" /></label>
-                <label>Local code<input name="localCode" type="text" value="City of Austin Building Criteria" /></label>
-                <label>Seismic category
-                  <select name="seismicCategory">
-                    <option value="A">A</option>
-                    <option value="B">B</option>
-                    <option value="C" selected>C</option>
-                    <option value="D">D</option>
-                    <option value="E">E</option>
+                <label>Grid carbon intensity (kgCO₂e/kWh) <span class="optional">optional</span>
+                  <input data-optional="true" name="gridIntensity" type="number" min="0" step="0.01" value="0.35" />
+                </label>
+                <label>Renewable electricity for fabrication (%) <span class="optional">optional</span>
+                  <input data-optional="true" name="renewableShare" type="number" min="0" max="100" value="35" />
+                </label>
+                <label>National code <span class="optional">optional</span>
+                  <input data-optional="true" name="nationalCode" type="text" value="IBC 2024" />
+                </label>
+                <label>Local code <span class="optional">optional</span>
+                  <input data-optional="true" name="localCode" type="text" value="City of Austin Building Criteria" />
+                </label>
+                <label>Seismic category <span class="optional">optional</span>
+                  <select data-optional="true" name="seismicCategory">
+                    <option value="A">A</option><option value="B">B</option><option value="C" selected>C</option><option value="D">D</option><option value="E">E</option>
                   </select>
                 </label>
-                <label>Required fire rating (hours)<input name="fireRating" type="number" min="1" max="6" step="0.5" value="2" required /></label>
-                <label>Insulation level (R-value)<input name="insulationR" type="number" min="5" step="1" value="30" required /></label>
               </div>
             </details>
 
-            <button type="submit">Calculate Carbon Performance</button>
+            <div class="actions-row sticky-actions">
+              <button type="button" id="optional-toggle" class="ghost">Toggle Optional Inputs</button>
+              <button type="submit">Calculate Carbon Performance</button>
+            </div>
           </form>
         </section>
 
-        <section class="panel panel-results">
+        <section class="panel">
           <div class="panel-head">
-            <h2>Carbon Results & Logistics</h2>
-            <p>Compare embodied carbon pathways and review route assumptions.</p>
+            <h2>Interactive Logistics & Results</h2>
+            <p>Map is synced with city and manufacturer selections. Drag markers for fine-tuning.</p>
           </div>
-
-          <div id="map" aria-label="Manufacturer to site map"></div>
-
-          <div id="results-summary" class="results-summary">Fill in project assumptions and click <em>Calculate Carbon Performance</em>.</div>
-
+          <div id="map"></div>
+          <div id="results-summary" class="results-card">Select inputs and run the model to generate outputs.</div>
           <div class="chart-wrap">
             <h3>Embodied Carbon Comparison</h3>
-            <div class="chart" id="comparison-chart" aria-label="Embodied carbon comparison chart"></div>
+            <div class="chart" id="comparison-chart"></div>
           </div>
-
           <div id="assumptions" class="assumptions"></div>
         </section>
       </section>

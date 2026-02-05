@@ -1,34 +1,43 @@
-# Mass Timber Carbon Emissions Calculator
+# Mass Timber Carbon Studio Pro
 
-A lightweight Windows-friendly web app prototype to estimate embodied carbon for mass timber projects and compare outcomes against steel and concrete structural baselines.
+A professional, interactive web application to estimate embodied carbon for mass timber projects and benchmark against steel and concrete alternatives.
 
-## What this app includes
+## Highlights
 
-- 20+ user-editable project parameters (geometry, material split, code context, logistics, and energy assumptions).
-- Interactive Leaflet map with draggable markers for **manufacturer** and **project site**.
-- Automatic route-distance estimation (great-circle approximation) used in logistics emissions.
-- Carbon output for:
-  - Mass timber scenario
-  - Conventional steel scenario
-  - Conventional concrete scenario
-- Side-by-side chart and savings comparison output.
+- Professional UI with workflow sidebar, KPI cards, grouped sections, sticky action bar, and responsive layout.
+- Optional parameter support: users can leave many fields blank and rely on intelligent defaults.
+- Auto-estimation engine for floor area, floor plate, height, CLT volume, and glulam volume based on building typology and occupancy.
+- Auto-populated datasets for major US cities and major US timber manufacturers.
+- Interactive Leaflet map synced with project city and manufacturer selection.
+- Live logistics distance and carbon comparison chart.
 
-## Quick start
+## Run locally
 
-1. Open `index.html` in a browser.
-2. Populate project fields in the form.
-3. Move map markers to set manufacturer and site locations.
-4. Click **Calculate Emissions**.
+```bash
+python -m http.server 8000
+```
 
-## Windows packaging options
+Open:
 
-This prototype is browser-based. To ship as a native Windows desktop app, package it with one of:
+```text
+http://localhost:8000
+```
 
-- **Electron** (Node-based desktop shell)
-- **Tauri** (Rust-based desktop shell)
-- **WebView2 wrapper**
+## Usage flow
+
+1. Select project typology and occupancy.
+2. Keep known values, leave unknown optional values blank.
+3. Use **Auto-estimate Building Quantities** when needed.
+4. Select city and timber manufacturer (or drag map markers).
+5. Click **Calculate Carbon Performance**.
+
+## Windows app packaging options
+
+- Electron
+- Tauri
+- WebView2 wrapper
 
 ## Notes
 
-- Current calculations are planning-level estimates and not a replacement for detailed LCA software.
-- Emission factors are transparent in `app.js` and can be updated to align with your internal benchmarks or EPD datasets.
+- This is a planning-stage estimator, not a substitute for full LCA software.
+- Emissions factors and defaults are editable in `app.js`.
