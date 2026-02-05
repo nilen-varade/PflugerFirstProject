@@ -1,105 +1,101 @@
+const { z } = window.Zod;
+
 const form = document.getElementById('calculator-form');
-const distanceLabel = document.getElementById('distance-km');
+const distanceLabel = document.getElementById('distance-mi');
 const timberTotal = document.getElementById('timber-total');
 const steelSavings = document.getElementById('steel-savings');
 const concreteSavings = document.getElementById('concrete-savings');
 const timberCostEl = document.getElementById('timber-cost');
-const steelCostDeltaEl = document.getElementById('steel-cost-delta');
+const solarPeakEl = document.getElementById('solar-peak');
 const resultsSummary = document.getElementById('results-summary');
-const carbonChart = document.getElementById('comparison-chart');
-const costChart = document.getElementById('cost-chart');
 const assumptions = document.getElementById('assumptions');
+const funFacts = document.getElementById('fun-facts');
+const imageryPanel = document.getElementById('imagery-panel');
+const cesiumPanel = document.getElementById('cesium-panel');
 const projectCitySelect = document.getElementById('project-city');
 const manufacturerSelect = document.getElementById('manufacturer-select');
+
+const siteLookupBtn = document.getElementById('site-lookup-btn');
 const estimateBtn = document.getElementById('estimate-btn');
 const optionalToggleBtn = document.getElementById('optional-toggle');
+const orsRouteBtn = document.getElementById('ors-route-btn');
+const mapillaryBtn = document.getElementById('mapillary-btn');
+const cesiumBtn = document.getElementById('cesium-btn');
+const exportPdfBtn = document.getElementById('export-pdf-btn');
 
 const usCities = [
-  { name: 'New York, NY', lat: 40.7128, lng: -74.0060, cost: 1.23 },
-  { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437, cost: 1.2 },
-  { name: 'Chicago, IL', lat: 41.8781, lng: -87.6298, cost: 1.1 },
-  { name: 'Houston, TX', lat: 29.7604, lng: -95.3698, cost: 0.98 },
-  { name: 'Phoenix, AZ', lat: 33.4484, lng: -112.0740, cost: 1.01 },
-  { name: 'Philadelphia, PA', lat: 39.9526, lng: -75.1652, cost: 1.07 },
-  { name: 'San Antonio, TX', lat: 29.4241, lng: -98.4936, cost: 0.96 },
-  { name: 'San Diego, CA', lat: 32.7157, lng: -117.1611, cost: 1.16 },
-  { name: 'Dallas, TX', lat: 32.7767, lng: -96.7970, cost: 1.0 },
   { name: 'Austin, TX', lat: 30.2672, lng: -97.7431, cost: 1.09 },
   { name: 'Seattle, WA', lat: 47.6062, lng: -122.3321, cost: 1.17 },
+  { name: 'New York, NY', lat: 40.7128, lng: -74.0060, cost: 1.23 },
+  { name: 'Chicago, IL', lat: 41.8781, lng: -87.6298, cost: 1.1 },
   { name: 'Denver, CO', lat: 39.7392, lng: -104.9903, cost: 1.08 },
-  { name: 'Boston, MA', lat: 42.3601, lng: -71.0589, cost: 1.19 },
-  { name: 'Atlanta, GA', lat: 33.7490, lng: -84.3880, cost: 1.02 },
-  { name: 'Miami, FL', lat: 25.7617, lng: -80.1918, cost: 1.08 },
-  { name: 'Portland, OR', lat: 45.5152, lng: -122.6784, cost: 1.1 },
-  { name: 'Nashville, TN', lat: 36.1627, lng: -86.7816, cost: 0.99 },
-  { name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431, cost: 0.98 },
-  { name: 'Minneapolis, MN', lat: 44.9778, lng: -93.2650, cost: 1.05 },
-  { name: 'San Francisco, CA', lat: 37.7749, lng: -122.4194, cost: 1.3 },
+  { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437, cost: 1.2 },
 ];
 
 const timberManufacturers = [
-  { name: 'SmartLam North America (Columbia Falls, MT)', lat: 48.3725, lng: -114.1810 },
-  { name: 'DR Johnson Wood Innovations (Riddle, OR)', lat: 42.9504, lng: -123.3645 },
+  { name: 'SmartLam (Columbia Falls, MT)', lat: 48.3725, lng: -114.1810 },
+  { name: 'DR Johnson (Riddle, OR)', lat: 42.9504, lng: -123.3645 },
   { name: 'Vaagen Timbers (Colville, WA)', lat: 48.5466, lng: -117.9055 },
-  { name: 'Katerra Legacy CLT (Spokane Valley, WA)', lat: 47.6732, lng: -117.2394 },
-  { name: 'Freres Engineered Wood (Lyons, OR)', lat: 44.7740, lng: -122.6076 },
-  { name: 'Mercer Mass Timber / Structurlam (Conway, AR)', lat: 35.0887, lng: -92.4335 },
-  { name: 'Timberlab / Swinerton (Greenville, SC)', lat: 34.8526, lng: -82.3940 },
+  { name: 'Freres (Lyons, OR)', lat: 44.7740, lng: -122.6076 },
   { name: 'Sterling Structural (Lufkin, TX)', lat: 31.3382, lng: -94.7291 },
-  { name: 'Hasslacher Norica USA (Nashville, TN)', lat: 36.1627, lng: -86.7816 },
-  { name: 'Boise Cascade Mass Timber (Boise, ID)', lat: 43.6150, lng: -116.2023 },
-  { name: 'Rosboro Laminated (Springfield, OR)', lat: 44.0462, lng: -123.0220 },
-  { name: 'Binderholz North America (Live Oak, FL)', lat: 30.2949, lng: -82.9840 },
-  { name: 'Weyerhaeuser Engineered Wood (Tacoma, WA)', lat: 47.2529, lng: -122.4443 },
-  { name: 'International Beams Hub (Myrtle Creek, OR)', lat: 43.0207, lng: -123.2928 },
 ];
 
 const transportFactors = { truck: 0.11, rail: 0.03, ship: 0.015, multimodal: 0.055 };
-
 const speciesFactors = {
   'douglas-fir': { density: 0.53, sequestration: -760, processFactor: 1.0 },
   'spruce-pine-fir': { density: 0.46, sequestration: -690, processFactor: 0.96 },
   'southern-yellow-pine': { density: 0.57, sequestration: -780, processFactor: 1.04 },
   'hemlock-fir': { density: 0.49, sequestration: -710, processFactor: 0.99 },
-  'european-spruce': { density: 0.45, sequestration: -680, processFactor: 1.08 },
 };
-
-const buildingDefaults = {
-  education: { areaPerPerson: 11, stories: 2, cltPerM2: 0.24, glulamPerM2: 0.065, timberCost: 355, steelCost: 335, concreteCost: 328 },
-  office: { areaPerPerson: 13, stories: 8, cltPerM2: 0.2, glulamPerM2: 0.052, timberCost: 380, steelCost: 350, concreteCost: 338 },
-  residential: { areaPerPerson: 30, stories: 6, cltPerM2: 0.22, glulamPerM2: 0.058, timberCost: 340, steelCost: 320, concreteCost: 315 },
-  civic: { areaPerPerson: 10, stories: 3, cltPerM2: 0.26, glulamPerM2: 0.072, timberCost: 370, steelCost: 345, concreteCost: 336 },
-  industrial: { areaPerPerson: 25, stories: 1, cltPerM2: 0.1, glulamPerM2: 0.03, timberCost: 250, steelCost: 235, concreteCost: 228 },
-  recreation: { areaPerPerson: 12, stories: 2, cltPerM2: 0.28, glulamPerM2: 0.08, timberCost: 395, steelCost: 360, concreteCost: 350 },
-  library: { areaPerPerson: 14, stories: 3, cltPerM2: 0.25, glulamPerM2: 0.07, timberCost: 390, steelCost: 355, concreteCost: 345 },
-  healthcare: { areaPerPerson: 22, stories: 7, cltPerM2: 0.19, glulamPerM2: 0.05, timberCost: 460, steelCost: 430, concreteCost: 420 },
-  hospitality: { areaPerPerson: 28, stories: 10, cltPerM2: 0.21, glulamPerM2: 0.055, timberCost: 410, steelCost: 385, concreteCost: 375 },
-  'mixed-use': { areaPerPerson: 20, stories: 9, cltPerM2: 0.22, glulamPerM2: 0.06, timberCost: 405, steelCost: 380, concreteCost: 368 },
+const defaultsByType = {
+  education: { areaPerPerson: 120, timberCost: 355, steelCost: 335, concreteCost: 328 },
+  recreation: { areaPerPerson: 145, timberCost: 395, steelCost: 360, concreteCost: 350 },
+  library: { areaPerPerson: 160, timberCost: 390, steelCost: 355, concreteCost: 345 },
+  office: { areaPerPerson: 140, timberCost: 380, steelCost: 350, concreteCost: 338 },
+  residential: { areaPerPerson: 320, timberCost: 340, steelCost: 320, concreteCost: 315 },
+  healthcare: { areaPerPerson: 240, timberCost: 460, steelCost: 430, concreteCost: 420 },
+  hospitality: { areaPerPerson: 300, timberCost: 410, steelCost: 385, concreteCost: 375 },
+  'mixed-use': { areaPerPerson: 220, timberCost: 405, steelCost: 380, concreteCost: 368 },
 };
 
 const map = L.map('map').setView([39.5, -98.35], 4);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  maxZoom: 18,
-  attribution: '&copy; OpenStreetMap contributors',
-}).addTo(map);
-
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
 const manufacturerMarker = L.marker([48.3725, -114.181], { draggable: true }).addTo(map).bindPopup('Manufacturer');
 const siteMarker = L.marker([30.2672, -97.7431], { draggable: true }).addTo(map).bindPopup('Project Site');
 const routeLine = L.polyline([manufacturerMarker.getLatLng(), siteMarker.getLatLng()], { color: '#1e66ff', weight: 3 }).addTo(map);
 
+let carbonChart;
+let costChart;
+let mixChart;
+let currentRouteMiles = 0;
+
+const schema = z.object({
+  projectName: z.string().min(1),
+  grossAreaFt2: z.coerce.number().min(0),
+  floorPlateFt2: z.coerce.number().min(0),
+  stories: z.coerce.number().min(0),
+  cltUsePercent: z.coerce.number().min(0).max(100),
+  wasteFactor: z.coerce.number().min(0).max(100),
+});
+
+function parseFtIn(text) {
+  if (!text || /^0/.test(text.trim())) return 0;
+  const m = text.match(/(\d+)\s*'\s*(\d+)?/);
+  if (!m) return 0;
+  const feet = Number(m[1] || 0);
+  const inches = Number(m[2] || 0);
+  return feet + inches / 12;
+}
+
 function num(fd, key, fallback = 0) {
-  const value = fd.get(key);
-  const parsed = Number(value);
-  return Number.isFinite(parsed) && value !== '' ? parsed : fallback;
+  const raw = fd.get(key);
+  const val = Number(raw);
+  return Number.isFinite(val) ? val : fallback;
 }
 
-function clamp(value, min, max) {
-  return Math.max(min, Math.min(max, value));
-}
-
-function haversineKm(a, b) {
+function haversineMiles(a, b) {
   const rad = (d) => (d * Math.PI) / 180;
-  const r = 6371;
+  const r = 3958.8;
   const dLat = rad(b.lat - a.lat);
   const dLng = rad(b.lng - a.lng);
   const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
@@ -110,9 +106,10 @@ function updateDistance() {
   const m = manufacturerMarker.getLatLng();
   const s = siteMarker.getLatLng();
   routeLine.setLatLngs([m, s]);
-  const km = haversineKm(m, s);
-  distanceLabel.textContent = `${km.toFixed(0)} km`;
-  return km;
+  currentRouteMiles = haversineMiles(m, s);
+  distanceLabel.textContent = `${currentRouteMiles.toFixed(0)} mi`;
+  updateSolar(s.lat, s.lng);
+  return currentRouteMiles;
 }
 
 function populateSelect(select, data) {
@@ -128,242 +125,262 @@ function syncMapFromSelections() {
   updateDistance();
 }
 
-function estimateQuantities(fd) {
+function estimate(fd) {
   const type = fd.get('buildingType') || 'education';
-  const d = buildingDefaults[type] || buildingDefaults.education;
-  const occ = num(fd, 'occupancy', 600);
-  const mode = fd.get('floorAreaMode') || 'manual';
-
-  const estimatedGross = occ * d.areaPerPerson;
-  const stories = num(fd, 'stories', d.stories);
-  const grossArea = mode === 'estimate' ? estimatedGross : num(fd, 'grossAreaInput', estimatedGross);
-  const floorPlate = num(fd, 'floorPlate', grossArea / Math.max(stories, 1));
-  const height = num(fd, 'height', stories * 4.2);
-
-  const cltVolume = num(fd, 'cltVolume', grossArea * d.cltPerM2);
-  const glulamVolume = num(fd, 'glulamVolume', grossArea * d.glulamPerM2);
-  const lvlVolume = num(fd, 'lvlVolume', grossArea * 0.015);
-  const nltVolume = num(fd, 'nltVolume', grossArea * 0.012);
-  const dltVolume = num(fd, 'dltVolume', grossArea * 0.009);
-
-  return {
-    grossArea,
-    floorPlate,
-    stories,
-    height,
-    cltVolume,
-    glulamVolume,
-    lvlVolume,
-    nltVolume,
-    dltVolume,
-    note: mode === 'estimate'
-      ? 'Gross area and timber quantities were approximated from building type and occupancy.'
-      : 'Missing quantities were approximated from typology intensities and provided geometry.',
-  };
+  const d = defaultsByType[type] || defaultsByType.education;
+  const occupancy = Math.max(0, num(fd, 'occupancy', 0));
+  const grossAreaFt2 = num(fd, 'grossAreaFt2', 0) || occupancy * d.areaPerPerson;
+  const stories = num(fd, 'stories', 0) || Math.max(1, Math.round(grossAreaFt2 / 25000));
+  const floorPlateFt2 = num(fd, 'floorPlateFt2', 0) || grossAreaFt2 / stories;
+  const heightFt = parseFtIn(fd.get('heightFtIn')) || (stories * 14);
+  const cltFt3 = num(fd, 'cltFt3', 0) || grossAreaFt2 * 0.8;
+  const glulamFt3 = num(fd, 'glulamFt3', 0) || grossAreaFt2 * 0.18;
+  const lvlFt3 = num(fd, 'lvlFt3', 0) || grossAreaFt2 * 0.06;
+  const nltFt3 = num(fd, 'nltFt3', 0) || grossAreaFt2 * 0.04;
+  const dltFt3 = num(fd, 'dltFt3', 0) || grossAreaFt2 * 0.03;
+  return { grossAreaFt2, stories, floorPlateFt2, heightFt, cltFt3, glulamFt3, lvlFt3, nltFt3, dltFt3 };
 }
 
-function calculate(fd, distanceKm) {
-  const est = estimateQuantities(fd);
-  const type = fd.get('buildingType') || 'education';
-  const defaults = buildingDefaults[type] || buildingDefaults.education;
+function updateSolar(lat, lng) {
+  const times = window.SunCalc.getTimes(new Date(), lat, lng);
+  const peak = times.solarNoon ? times.solarNoon.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+  solarPeakEl.textContent = peak;
+}
+
+async function geocodeSite(query) {
+  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
+  const res = await fetch(url, { headers: { 'Accept-Language': 'en-US' } });
+  const data = await res.json();
+  if (!data?.length) throw new Error('No site found');
+  return { lat: Number(data[0].lat), lng: Number(data[0].lon), display: data[0].display_name };
+}
+
+async function fetchOrsRouteMiles(apiKey) {
+  const start = manufacturerMarker.getLatLng();
+  const end = siteMarker.getLatLng();
+  const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
+    body: JSON.stringify({ coordinates: [[start.lng, start.lat], [end.lng, end.lat]] }),
+  });
+  const data = await response.json();
+  const meters = data?.routes?.[0]?.summary?.distance;
+  if (!meters) throw new Error('No route result');
+  return meters * 0.000621371;
+}
+
+function calculate(fd, routeMiles) {
+  const est = estimate(fd);
   const species = speciesFactors[fd.get('timberSpecies')] || speciesFactors['douglas-fir'];
-  const speciesMix = clamp(num(fd, 'speciesMixPct', 100) / 100, 0.2, 1);
+  const transportMode = fd.get('transportMode') || 'truck';
+  const waste = num(fd, 'wasteFactor', 0) / 100;
+  const cltShare = num(fd, 'cltUsePercent', 0) / 100;
+  const fire = num(fd, 'fireRating', 0);
+  const grid = num(fd, 'gridIntensity', 0);
+  const renew = num(fd, 'renewableShare', 0) / 100;
 
-  const cltUse = clamp(num(fd, 'cltUsePercent', 70) / 100, 0, 1);
-  const steelShare = clamp(num(fd, 'hybridSteelPercent', 18) / 100, 0, 1);
-  const concreteShare = clamp(num(fd, 'hybridConcretePercent', 12) / 100, 0, 1);
-  const wasteFactor = clamp(num(fd, 'wasteFactor', 5) / 100, 0, 0.35);
-  const reworkFactor = clamp(num(fd, 'reworkFactor', 3) / 100, 0, 0.25);
-  const renewableShare = clamp(num(fd, 'renewableShare', 35) / 100, 0, 1);
-  const gridIntensity = clamp(num(fd, 'gridIntensity', 0.32), 0.05, 1.3);
-  const fireRating = num(fd, 'fireRating', 2);
-  const resin = num(fd, 'resinIntensity', 8);
-  const dataQuality = clamp(num(fd, 'dataQualityFactor', 1), 0.8, 1.2);
-  const mode = fd.get('transportMode') || 'truck';
-  const payload = clamp(num(fd, 'payloadUtilization', 82) / 100, 0.4, 1);
-  const backhaul = clamp(num(fd, 'backhaulEfficiency', 35) / 100, 0, 1);
-  const siteCongestion = clamp(num(fd, 'siteCongestionPct', 10) / 100, 0, 0.5);
-  const dieselLiters = num(fd, 'dieselLiters', 60000);
-  const electricEquip = clamp(num(fd, 'electricEquipmentPct', 20) / 100, 0, 1);
-  const constructionMonths = num(fd, 'constructionMonths', 16);
+  const totalFt3 = (est.cltFt3 + est.glulamFt3 + est.lvlFt3 + est.nltFt3 + est.dltFt3) * (1 + waste);
+  const totalM3 = totalFt3 * 0.0283168;
+  const massTons = totalM3 * species.density;
+  const complexity = 1 + est.heightFt / 400 + fire * 0.02;
 
-  const timberVolume = (est.cltVolume + est.glulamVolume + est.lvlVolume + est.nltVolume + est.dltVolume) * (1 + wasteFactor + reworkFactor);
-  const timberMassTons = timberVolume * species.density * speciesMix;
+  const timberCarbon =
+    totalM3 * 115 * species.processFactor +
+    massTons * routeMiles * (transportFactors[transportMode] || transportFactors.truck) +
+    est.grossAreaFt2 * 0.9 * grid * (1 - renew) +
+    totalM3 * species.sequestration;
+  const steelCarbon = est.grossAreaFt2 * 22 * complexity + est.grossAreaFt2 * 1.1 * grid + routeMiles * 180;
+  const concreteCarbon = est.grossAreaFt2 * 14 * complexity + est.grossAreaFt2 * 0.95 * grid + routeMiles * 120;
 
-  const structuralComplexity = 1 + (est.height / 120) + (fireRating * 0.03) + siteCongestion;
-  const hybridSteelTons = est.grossArea * 0.055 * steelShare;
-  const hybridConcreteM3 = est.grossArea * 0.1 * concreteShare;
-  const connectorSteel = num(fd, 'connectorSteelTons', 40);
+  const type = fd.get('buildingType') || 'education';
+  const d = defaultsByType[type] || defaultsByType.education;
+  const cityCost = (usCities[Number(projectCitySelect.value)] || { cost: 1 }).cost;
+  const timberRate = num(fd, 'timberCostPerFt2', 0) || d.timberCost;
+  const steelRate = num(fd, 'steelCostPerFt2', 0) || d.steelCost;
+  const concreteRate = num(fd, 'concreteCostPerFt2', 0) || d.concreteCost;
 
-  const timberProduction = (
-    est.cltVolume * 112 + est.glulamVolume * 98 + est.lvlVolume * 140 + est.nltVolume * 85 + est.dltVolume * 78
-  ) * species.processFactor * dataQuality;
-  const resinEmissions = timberVolume * resin * 1.8;
-  const sequestration = timberVolume * species.sequestration;
-
-  const transportFactor = (transportFactors[mode] || transportFactors.truck) / payload * (1 + (1 - backhaul) * 0.3);
-  const transport = timberMassTons * distanceKm * transportFactor;
-
-  const fabEnergy = est.grossArea * 20 * structuralComplexity;
-  const fabEmissions = fabEnergy * gridIntensity * (1 - renewableShare);
-  const siteFuelEmissions = dieselLiters * 2.68 * (1 - electricEquip * 0.4);
-
-  const hybridEmissions = (hybridSteelTons + connectorSteel) * 1850 + hybridConcreteM3 * 300;
-  const massTimberCarbon = timberProduction + resinEmissions + transport + fabEmissions + hybridEmissions + siteFuelEmissions + sequestration;
-
-  const steelAltTons = est.grossArea * 0.12 * structuralComplexity;
-  const concreteAltM3 = est.grossArea * 0.17 * structuralComplexity;
-
-  const steelCarbon = steelAltTons * 1850 + est.grossArea * 11 * gridIntensity + steelAltTons * distanceKm * 0.11 * 0.7 + siteFuelEmissions * 1.12;
-  const concreteCarbon = concreteAltM3 * 300 + est.grossArea * 9.5 * gridIntensity + concreteAltM3 * 2.4 * distanceKm * 0.11 * 0.45 + siteFuelEmissions * 1.08;
-
-  const analysisYear = num(fd, 'analysisYear', 2026);
-  const yearsFromBase = Math.max(0, analysisYear - 2026);
-  const escalation = Math.max(0, num(fd, 'escalationPct', 3.5) / 100);
-  const regionalMultiplier = num(fd, 'regionCostMultiplier', (usCities[Number(projectCitySelect.value)] || { cost: 1 }).cost);
-  const laborIndex = num(fd, 'laborIndex', 1.0);
-  const contingency = Math.max(0, num(fd, 'contingencyPct', 8) / 100);
-  const softCost = Math.max(0, num(fd, 'softCostPct', 18) / 100);
-  const scheduleAdvantage = clamp(num(fd, 'timberScheduleAdvantage', 10) / 100, 0, 0.35);
-  const genCond = num(fd, 'generalConditionsPerMonth', 210000);
-  const financeCarry = num(fd, 'financingCarryPerMonth', 180000);
-
-  const ft2 = est.grossArea * 10.7639;
-  const timberCostRate = num(fd, 'timberCostPerFt2', defaults.timberCost);
-  const steelCostRate = num(fd, 'steelCostPerFt2', defaults.steelCost);
-  const concreteCostRate = num(fd, 'concreteCostPerFt2', defaults.concreteCost);
-
-  const escalationFactor = (1 + escalation) ** yearsFromBase;
-
-  const timberHardCost = ft2 * timberCostRate * regionalMultiplier * laborIndex * escalationFactor;
-  const steelHardCost = ft2 * steelCostRate * regionalMultiplier * laborIndex * escalationFactor;
-  const concreteHardCost = ft2 * concreteCostRate * regionalMultiplier * laborIndex * escalationFactor;
-
-  const timberScheduleMonths = constructionMonths * (1 - scheduleAdvantage);
-  const timberTimeCost = timberScheduleMonths * (genCond + financeCarry);
-  const steelTimeCost = constructionMonths * (genCond + financeCarry);
-  const concreteTimeCost = constructionMonths * 1.05 * (genCond + financeCarry);
-
-  const timberTotalCost = timberHardCost * (1 + contingency + softCost) + timberTimeCost;
-  const steelTotalCost = steelHardCost * (1 + contingency + softCost) + steelTimeCost;
-  const concreteTotalCost = concreteHardCost * (1 + contingency + softCost) + concreteTimeCost;
-
-  const carbonPrice = num(fd, 'carbonPrice', 70);
-  const carbonCreditCapture = clamp(num(fd, 'carbonCreditCapturePct', 30) / 100, 0, 1);
-  const timberCarbonValue = ((steelCarbon - massTimberCarbon) / 1000) * carbonPrice * carbonCreditCapture;
+  const timberCost = est.grossAreaFt2 * timberRate * cityCost;
+  const steelCost = est.grossAreaFt2 * steelRate * cityCost;
+  const concreteCost = est.grossAreaFt2 * concreteRate * cityCost;
 
   return {
-    ...est,
-    carbon: { timber: massTimberCarbon, steel: steelCarbon, concrete: concreteCarbon },
-    cost: { timber: timberTotalCost - timberCarbonValue, steel: steelTotalCost, concrete: concreteTotalCost },
-    assumptions: { structuralComplexity, distanceKm, mode, species: fd.get('timberSpecies') || 'douglas-fir', cltUse, note: est.note },
+    est,
+    complexity,
+    cltShare,
+    carbon: { timber: timberCarbon, steel: steelCarbon, concrete: concreteCarbon },
+    cost: { timber: timberCost, steel: steelCost, concrete: concreteCost },
   };
 }
 
 function fmtKg(v) { return `${Math.round(v).toLocaleString()} kg CO₂e`; }
 function fmtMoney(v) { return `$${Math.round(v).toLocaleString()}`; }
-function fmtDelta(v, suffix) { return `${Math.round(Math.abs(v)).toLocaleString()} ${suffix} ${v >= 0 ? 'lower' : 'higher'}`; }
 
-function renderBarChart(target, rows, formatter, styleOverride = '') {
-  const max = Math.max(...rows.map((r) => r.value), 1);
-  target.innerHTML = rows.map((row) => `
-    <div class="bar-row">
-      <strong>${row.label}</strong>
-      <div class="bar ${row.style} ${styleOverride}"><span style="width:${Math.max(2, (row.value / max) * 100)}%"></span></div>
-      <span>${formatter(row.value)}</span>
-    </div>
-  `).join('');
+function renderCharts(result) {
+  const carbonData = [result.carbon.timber, result.carbon.steel, result.carbon.concrete];
+  const costData = [result.cost.timber, result.cost.steel, result.cost.concrete];
+  const mixData = [result.est.cltFt3, result.est.glulamFt3, result.est.lvlFt3, result.est.nltFt3, result.est.dltFt3];
+
+  if (carbonChart) carbonChart.destroy();
+  if (costChart) costChart.destroy();
+  if (mixChart) mixChart.destroy();
+
+  carbonChart = new Chart(document.getElementById('carbon-canvas'), {
+    type: 'bar',
+    data: { labels: ['Timber', 'Steel', 'Concrete'], datasets: [{ label: 'Embodied Carbon', data: carbonData, backgroundColor: ['#14a163', '#d74848', '#ec8c2e'] }] },
+    options: { responsive: true, plugins: { legend: { display: false } } },
+  });
+
+  costChart = new Chart(document.getElementById('cost-canvas'), {
+    type: 'doughnut',
+    data: { labels: ['Timber', 'Steel', 'Concrete'], datasets: [{ data: costData, backgroundColor: ['#5d72ff', '#c552f5', '#5bb6ff'] }] },
+    options: { responsive: true },
+  });
+
+  mixChart = new Chart(document.getElementById('mix-canvas'), {
+    type: 'radar',
+    data: { labels: ['CLT', 'Glulam', 'LVL', 'NLT', 'DLT'], datasets: [{ label: 'Timber Mix (ft³)', data: mixData, fill: true, borderColor: '#1e66ff', backgroundColor: 'rgba(30,102,255,0.2)' }] },
+    options: { responsive: true },
+  });
 }
 
-function updateOptionalUI(hidden) {
-  form.classList.toggle('optional-hidden', hidden);
-  optionalToggleBtn.textContent = hidden ? 'Show Optional Emphasis' : 'Hide Optional Emphasis';
+function renderFunFacts(result) {
+  const treesEq = Math.max(0, (result.carbon.steel - result.carbon.timber) / 21);
+  const carMiles = Math.max(0, (result.carbon.steel - result.carbon.timber) / 0.404);
+  const poolEq = Math.max(0, result.est.grossAreaFt2 / 2500);
+  funFacts.innerHTML = `
+    <strong>Fun Facts</strong><br />
+    • Timber scenario saves roughly <strong>${Math.round(treesEq).toLocaleString()}</strong> tree-sequestration-year equivalents vs steel baseline.<br />
+    • Carbon savings are similar to avoiding about <strong>${Math.round(carMiles).toLocaleString()}</strong> passenger car miles.<br />
+    • Your building area equals about <strong>${poolEq.toFixed(1)}</strong> basketball courts.
+  `;
 }
 
-let optionalHidden = false;
-optionalToggleBtn.addEventListener('click', () => {
-  optionalHidden = !optionalHidden;
-  updateOptionalUI(optionalHidden);
+async function onSubmit(event) {
+  event.preventDefault();
+  const fd = new FormData(form);
+
+  const validation = schema.safeParse({
+    projectName: fd.get('projectName'),
+    grossAreaFt2: fd.get('grossAreaFt2') || 0,
+    floorPlateFt2: fd.get('floorPlateFt2') || 0,
+    stories: fd.get('stories') || 0,
+    cltUsePercent: fd.get('cltUsePercent') || 0,
+    wasteFactor: fd.get('wasteFactor') || 0,
+  });
+
+  if (!validation.success) {
+    resultsSummary.innerHTML = `<strong>Validation issue:</strong> ${validation.error.issues[0].message}`;
+    return;
+  }
+
+  const routeMiles = updateDistance();
+  const result = calculate(fd, routeMiles);
+
+  const deltaSteel = result.carbon.steel - result.carbon.timber;
+  const deltaConcrete = result.carbon.concrete - result.carbon.timber;
+  timberTotal.textContent = fmtKg(result.carbon.timber);
+  steelSavings.textContent = `${Math.round(Math.abs(deltaSteel)).toLocaleString()} kg ${deltaSteel >= 0 ? 'lower' : 'higher'}`;
+  concreteSavings.textContent = `${Math.round(Math.abs(deltaConcrete)).toLocaleString()} kg ${deltaConcrete >= 0 ? 'lower' : 'higher'}`;
+  steelSavings.className = deltaSteel >= 0 ? 'positive' : 'negative';
+  concreteSavings.className = deltaConcrete >= 0 ? 'positive' : 'negative';
+  timberCostEl.textContent = fmtMoney(result.cost.timber);
+
+  renderCharts(result);
+  renderFunFacts(result);
+
+  resultsSummary.innerHTML = `
+    <p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(result.est.grossAreaFt2).toLocaleString()} ft²</strong>.</p>
+    <p>Timber carbon: <strong>${fmtKg(result.carbon.timber)}</strong> | Steel: <strong>${fmtKg(result.carbon.steel)}</strong> | Concrete: <strong>${fmtKg(result.carbon.concrete)}</strong>.</p>
+    <p>Timber cost: <strong>${fmtMoney(result.cost.timber)}</strong> | Steel: <strong>${fmtMoney(result.cost.steel)}</strong> | Concrete: <strong>${fmtMoney(result.cost.concrete)}</strong>.</p>
+  `;
+
+  assumptions.innerHTML = `Complexity ${result.complexity.toFixed(2)} • CLT share ${Math.round(result.cltShare * 100)}% • Route ${routeMiles.toFixed(1)} mi • Optional inputs defaulted to zero unless provided.`;
+}
+
+siteLookupBtn.addEventListener('click', async () => {
+  try {
+    const q = form.elements.siteQuery.value.trim();
+    if (!q) return;
+    const found = await geocodeSite(q);
+    siteMarker.setLatLng([found.lat, found.lng]);
+    map.panTo([found.lat, found.lng]);
+    resultsSummary.innerHTML = `<p><strong>Site found:</strong> ${found.display}</p>`;
+    updateDistance();
+  } catch (err) {
+    resultsSummary.innerHTML = `<p><strong>Lookup failed:</strong> ${err.message}</p>`;
+  }
 });
 
 estimateBtn.addEventListener('click', () => {
   const fd = new FormData(form);
-  const est = estimateQuantities(fd);
-  form.elements.grossAreaInput.value = Math.round(est.grossArea);
-  form.elements.floorPlate.value = Math.round(est.floorPlate);
+  const est = estimate(fd);
+  form.elements.grossAreaFt2.value = Math.round(est.grossAreaFt2);
+  form.elements.floorPlateFt2.value = Math.round(est.floorPlateFt2);
   form.elements.stories.value = Math.round(est.stories);
-  form.elements.height.value = est.height.toFixed(1);
-  form.elements.cltVolume.value = Math.round(est.cltVolume);
-  form.elements.glulamVolume.value = Math.round(est.glulamVolume);
-  form.elements.lvlVolume.value = Math.round(est.lvlVolume);
-  form.elements.nltVolume.value = Math.round(est.nltVolume);
-  form.elements.dltVolume.value = Math.round(est.dltVolume);
-  resultsSummary.innerHTML = `<p><strong>Auto-estimation completed.</strong> ${est.note}</p>`;
+  form.elements.heightFtIn.value = `${Math.floor(est.heightFt)}' ${Math.round((est.heightFt % 1) * 12)}"`;
+  form.elements.cltFt3.value = Math.round(est.cltFt3);
+  form.elements.glulamFt3.value = Math.round(est.glulamFt3);
+  form.elements.lvlFt3.value = Math.round(est.lvlFt3);
+  form.elements.nltFt3.value = Math.round(est.nltFt3);
+  form.elements.dltFt3.value = Math.round(est.dltFt3);
+  resultsSummary.innerHTML = `<p><strong>Auto-estimation complete.</strong> Zero-value optional fields were estimated from building type and occupancy.</p>`;
 });
 
+let optionalHidden = false;
+optionalToggleBtn.addEventListener('click', () => {
+  optionalHidden = !optionalHidden;
+  form.classList.toggle('optional-hidden', optionalHidden);
+});
+
+orsRouteBtn.addEventListener('click', async () => {
+  try {
+    const key = form.elements.orsApiKey.value.trim();
+    if (!key) throw new Error('ORS key required');
+    const miles = await fetchOrsRouteMiles(key);
+    currentRouteMiles = miles;
+    distanceLabel.textContent = `${miles.toFixed(0)} mi`;
+    resultsSummary.innerHTML = `<p><strong>OpenRouteService route distance:</strong> ${miles.toFixed(1)} mi</p>`;
+  } catch (e) {
+    resultsSummary.innerHTML = `<p><strong>ORS fallback:</strong> ${e.message}. Using straight-line distance.</p>`;
+    updateDistance();
+  }
+});
+
+mapillaryBtn.addEventListener('click', () => {
+  const token = form.elements.mapillaryToken.value.trim();
+  const s = siteMarker.getLatLng();
+  if (!token) {
+    imageryPanel.textContent = 'Mapillary token missing. Add token to load street-level imagery links.';
+    return;
+  }
+  imageryPanel.innerHTML = `Mapillary ready. Open street imagery near site: <a href="https://www.mapillary.com/app/?lat=${s.lat}&lng=${s.lng}&z=16" target="_blank" rel="noreferrer">Launch Mapillary Viewer</a>`;
+});
+
+cesiumBtn.addEventListener('click', () => {
+  const token = form.elements.cesiumToken.value.trim();
+  const tiles = form.elements.tilesetUrl.value.trim();
+  const collada = form.elements.colladaUrl.value.trim();
+  cesiumPanel.innerHTML = `Cesium/3D integration configured. ${token ? 'Ion token provided.' : 'No Ion token.'} ${tiles ? `Tileset URL: ${tiles}` : 'No tiles URL.'} ${collada ? `Collada URL: ${collada}` : 'No Collada URL.'}`;
+});
+
+exportPdfBtn.addEventListener('click', async () => {
+  const canvas = await html2canvas(document.querySelector('.panel:last-child'));
+  const img = canvas.toDataURL('image/png');
+  const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+  const width = 190;
+  const height = (canvas.height * width) / canvas.width;
+  pdf.addImage(img, 'PNG', 10, 10, width, Math.min(height, 270));
+  pdf.save('mass-timber-report.pdf');
+});
+
+form.addEventListener('submit', onSubmit);
 projectCitySelect.addEventListener('change', syncMapFromSelections);
 manufacturerSelect.addEventListener('change', syncMapFromSelections);
 manufacturerMarker.on('dragend', updateDistance);
 siteMarker.on('dragend', updateDistance);
 
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const fd = new FormData(form);
-  const distanceKm = updateDistance();
-  const result = calculate(fd, distanceKm);
-
-  const carbonDeltaSteel = result.carbon.steel - result.carbon.timber;
-  const carbonDeltaConcrete = result.carbon.concrete - result.carbon.timber;
-  const costDeltaSteel = result.cost.steel - result.cost.timber;
-
-  timberTotal.textContent = fmtKg(result.carbon.timber);
-  steelSavings.textContent = fmtDelta(carbonDeltaSteel, 'kg CO₂e');
-  concreteSavings.textContent = fmtDelta(carbonDeltaConcrete, 'kg CO₂e');
-  steelSavings.className = carbonDeltaSteel >= 0 ? 'positive' : 'negative';
-  concreteSavings.className = carbonDeltaConcrete >= 0 ? 'positive' : 'negative';
-
-  timberCostEl.textContent = fmtMoney(result.cost.timber);
-  steelCostDeltaEl.textContent = fmtDelta(costDeltaSteel, 'USD');
-  steelCostDeltaEl.className = costDeltaSteel >= 0 ? 'positive' : 'negative';
-
-  renderBarChart(carbonChart, [
-    { label: 'Mass Timber', value: result.carbon.timber, style: 'timber' },
-    { label: 'Steel Baseline', value: result.carbon.steel, style: 'steel' },
-    { label: 'Concrete Baseline', value: result.carbon.concrete, style: 'concrete' },
-  ], fmtKg);
-
-  renderBarChart(costChart, [
-    { label: 'Mass Timber', value: result.cost.timber, style: 'cost' },
-    { label: 'Steel Baseline', value: result.cost.steel, style: 'steel' },
-    { label: 'Concrete Baseline', value: result.cost.concrete, style: 'concrete' },
-  ], fmtMoney);
-
-  resultsSummary.innerHTML = `
-    <p><strong>${fd.get('projectName') || 'Project'}</strong> modeled at <strong>${Math.round(result.grossArea).toLocaleString()} m²</strong> (${Math.round(result.grossArea * 10.7639).toLocaleString()} ft²).</p>
-    <p>Embodied carbon (timber): <strong>${fmtKg(result.carbon.timber)}</strong>; reduction vs steel: <strong>${fmtDelta(carbonDeltaSteel, 'kg CO₂e')}</strong>; vs concrete: <strong>${fmtDelta(carbonDeltaConcrete, 'kg CO₂e')}</strong>.</p>
-    <p>Total project cost (timber): <strong>${fmtMoney(result.cost.timber)}</strong>; delta vs steel baseline: <strong>${fmtDelta(costDeltaSteel, 'USD')}</strong>.</p>
-    <p><em>${result.assumptions.note}</em></p>
-  `;
-
-  assumptions.innerHTML = `
-    Structural complexity <strong>${result.assumptions.structuralComplexity.toFixed(2)}</strong>, transport mode <strong>${result.assumptions.mode}</strong>, route distance <strong>${result.assumptions.distanceKm.toFixed(0)} km</strong>,
-    primary species <strong>${result.assumptions.species}</strong>, CLT share <strong>${Math.round(result.assumptions.cltUse * 100)}%</strong>.
-  `;
-});
-
 populateSelect(projectCitySelect, usCities);
 populateSelect(manufacturerSelect, timberManufacturers);
-projectCitySelect.value = String(usCities.findIndex((x) => x.name.startsWith('Austin')));
+projectCitySelect.value = '0';
 manufacturerSelect.value = '0';
 syncMapFromSelections();
-renderBarChart(carbonChart, [
-  { label: 'Mass Timber', value: 0, style: 'timber' },
-  { label: 'Steel Baseline', value: 0, style: 'steel' },
-  { label: 'Concrete Baseline', value: 0, style: 'concrete' },
-], fmtKg);
-renderBarChart(costChart, [
-  { label: 'Mass Timber', value: 0, style: 'cost' },
-  { label: 'Steel Baseline', value: 0, style: 'steel' },
-  { label: 'Concrete Baseline', value: 0, style: 'concrete' },
-], fmtMoney);
-updateOptionalUI(false);

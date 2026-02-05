@@ -1,16 +1,21 @@
-# Mass Timber Carbon Studio Ultra
+# Mass Timber Carbon Studio Ultra+
 
-A highly detailed professional web app for mass timber embodied-carbon and cost benchmarking versus steel and concrete systems.
+Professional conceptual calculator for mass timber embodied carbon and cost comparisons against steel and concrete.
 
-## What’s new
+## Major capabilities
 
-- **80+ planning parameters** across project profile, geometry, timber systems, species selection, logistics, code/risk, and cost assumptions.
-- **Expanded building types** including recreation, library, healthcare, hospitality, mixed-use, and more.
-- **Timber species modeling** including Douglas Fir-Larch, SPF, Southern Yellow Pine, Hemlock-Fir, and European Spruce.
-- **Cost benchmarking** with market-style $/ft² inputs, escalation, contingency, soft costs, schedule acceleration, and financing impacts.
-- **Auto-estimation mode** for major unknown quantities (gross area, plate, stories, height, CLT/glulam/LVL/NLT/DLT volumes).
-- **Major US city + timber manufacturer datasets** synchronized with interactive map markers.
-- **Comprehensive executive output** with carbon and cost deltas against steel and concrete baselines.
+- Imperial-unit workflow (ft/in and ft²/ft³).
+- Optional parameters default to **0** until project-specific data is entered.
+- Hover tooltips on parameter labels for plain-language guidance.
+- Expanded code selectors: older/new IBC, IFC, energy code, and local code options.
+- Site lookup by address/school name (OSM geocoding).
+- OpenRouteService routing distance option (API key supported).
+- SunCalc integration for solar noon/position context.
+- Mapillary street-level imagery launch integration.
+- Cesium/3D Tiles + Collada configuration panel hooks.
+- Zod validation for key input constraints.
+- Interactive charts (bar/doughnut/radar) + fun facts.
+- PDF report export using jsPDF + html2canvas.
 
 ## Run
 
@@ -24,14 +29,7 @@ Open:
 http://localhost:8000
 ```
 
-## Typical workflow
+## Notes
 
-1. Select building type and core project assumptions.
-2. Fill known values and keep optional values blank where unknown.
-3. Use **Auto-estimate Quantities + Timber Volumes**.
-4. Select project city and manufacturer (or drag map markers).
-5. Click **Generate Comprehensive Carbon + Cost Report**.
-
-## Important note
-
-This is still a conceptual estimator intended for early design and planning decisions. It should be calibrated against project-specific EPDs, supplier data, and formal LCA workflows before final decision-making.
+- This remains a conceptual planner and should be calibrated using project-specific EPDs and formal LCA workflows.
+- For ORS, Mapillary, and Cesium production usage, provide valid API keys/tokens.
