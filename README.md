@@ -1,34 +1,34 @@
-# Mass Timber High School Gym Simulation
+# Mass Timber Carbon Emissions Calculator
 
-## Project Overview
-This project contains simulations and analysis for a mass timber high school gymnasium design. The project explores the structural, environmental, and economic aspects of using mass timber construction methods for educational athletic facilities.
+A lightweight Windows-friendly web app prototype to estimate embodied carbon for mass timber projects and compare outcomes against steel and concrete structural baselines.
 
-## Project Goals
-- Analyze structural performance of mass timber systems for large-span gym spaces
-- Evaluate environmental benefits and carbon footprint reduction
-- Compare cost and constructability with traditional construction methods
-- Demonstrate feasibility of mass timber for institutional athletic buildings
+## What this app includes
 
-## Technologies & Tools
-- Structural analysis software
-- Building Information Modeling (BIM)
-- Energy modeling and simulation tools
-- Cost estimation tools
+- 20+ user-editable project parameters (geometry, material split, code context, logistics, and energy assumptions).
+- Interactive Leaflet map with draggable markers for **manufacturer** and **project site**.
+- Automatic route-distance estimation (great-circle approximation) used in logistics emissions.
+- Carbon output for:
+  - Mass timber scenario
+  - Conventional steel scenario
+  - Conventional concrete scenario
+- Side-by-side chart and savings comparison output.
 
-## Project Scope
-- High school gymnasium facility
-- Mass timber structural system design
-- Performance simulations and analysis
-- Documentation and reporting
+## Quick start
 
-## Getting Started
-Documentation and simulation files will be organized in this repository as the project develops.
+1. Open `index.html` in a browser.
+2. Populate project fields in the form.
+3. Move map markers to set manufacturer and site locations.
+4. Click **Calculate Emissions**.
 
-## Project Status
-Initial project setup - simulation work in progress
+## Windows packaging options
 
-## Author
-Pfluger Architects Team
+This prototype is browser-based. To ship as a native Windows desktop app, package it with one of:
 
-## License
-[To be determined]
+- **Electron** (Node-based desktop shell)
+- **Tauri** (Rust-based desktop shell)
+- **WebView2 wrapper**
+
+## Notes
+
+- Current calculations are planning-level estimates and not a replacement for detailed LCA software.
+- Emission factors are transparent in `app.js` and can be updated to align with your internal benchmarks or EPD datasets.
