@@ -6,447 +6,309 @@ const timberTotal = document.getElementById('timber-total');
 const steelSavings = document.getElementById('steel-savings');
 const concreteSavings = document.getElementById('concrete-savings');
 const timberCostEl = document.getElementById('timber-cost');
+const complianceScoreEl = document.getElementById('compliance-score');
 const solarPeakEl = document.getElementById('solar-peak');
 const resultsSummary = document.getElementById('results-summary');
+const reportGrid = document.getElementById('report-grid');
 const assumptions = document.getElementById('assumptions');
 const funFacts = document.getElementById('fun-facts');
+const recommendationsEl = document.getElementById('recommendations');
 const imageryPanel = document.getElementById('imagery-panel');
 const cesiumPanel = document.getElementById('cesium-panel');
 const projectCitySelect = document.getElementById('project-city');
 const manufacturerSelect = document.getElementById('manufacturer-select');
 const buildingTypeSelect = form.elements.buildingType;
 
-const siteLookupBtn = document.getElementById('site-lookup-btn');
-const estimateBtn = document.getElementById('estimate-btn');
-const optionalToggleBtn = document.getElementById('optional-toggle');
-const orsRouteBtn = document.getElementById('ors-route-btn');
-const mapillaryBtn = document.getElementById('mapillary-btn');
-const cesiumBtn = document.getElementById('cesium-btn');
-const exportPdfBtn = document.getElementById('export-pdf-btn');
+const cityData = [
+  ['Houston, TX',29.7604,-95.3698,0.98],['San Antonio, TX',29.4241,-98.4936,0.96],['Dallas, TX',32.7767,-96.7970,1.00],['Austin, TX',30.2672,-97.7431,1.09],['Fort Worth, TX',32.7555,-97.3308,0.98],['El Paso, TX',31.7619,-106.4850,0.92],['Arlington, TX',32.7357,-97.1081,0.98],['Corpus Christi, TX',27.8006,-97.3964,0.94],['Plano, TX',33.0198,-96.6989,1.02],['Lubbock, TX',33.5779,-101.8552,0.90],['Laredo, TX',27.5306,-99.4803,0.91],['Irving, TX',32.8140,-96.9489,0.99],['Garland, TX',32.9126,-96.6389,0.98],['Amarillo, TX',35.2220,-101.8313,0.90],['Grand Prairie, TX',32.7459,-96.9978,0.98],['McKinney, TX',33.1972,-96.6398,1.00],['Frisco, TX',33.1507,-96.8236,1.02],['Brownsville, TX',25.9017,-97.4975,0.90],['Pasadena, TX',29.6911,-95.2091,0.95],['Killeen, TX',31.1171,-97.7278,0.93],['Waco, TX',31.5493,-97.1467,0.94],['McAllen, TX',26.2034,-98.2300,0.91],['Denton, TX',33.2148,-97.1331,0.97],['Midland, TX',31.9973,-102.0779,0.93],['Abilene, TX',32.4487,-99.7331,0.90],
+  ['New York, NY',40.7128,-74.0060,1.23],['Los Angeles, CA',34.0522,-118.2437,1.20],['Chicago, IL',41.8781,-87.6298,1.10],['Phoenix, AZ',33.4484,-112.0740,1.01],['Philadelphia, PA',39.9526,-75.1652,1.07],['San Diego, CA',32.7157,-117.1611,1.16],['San Jose, CA',37.3382,-121.8863,1.19],['Jacksonville, FL',30.3322,-81.6557,0.98],['Columbus, OH',39.9612,-82.9988,0.96],['Charlotte, NC',35.2271,-80.8431,0.98],['Indianapolis, IN',39.7684,-86.1581,0.95],['Seattle, WA',47.6062,-122.3321,1.17],['Denver, CO',39.7392,-104.9903,1.08],['Boston, MA',42.3601,-71.0589,1.19],['Nashville, TN',36.1627,-86.7816,0.99],['Baltimore, MD',39.2904,-76.6122,1.05],['Milwaukee, WI',43.0389,-87.9065,0.97],['Portland, OR',45.5152,-122.6784,1.10],['Las Vegas, NV',36.1699,-115.1398,1.03],['Detroit, MI',42.3314,-83.0458,0.95],['Memphis, TN',35.1495,-90.0490,0.92],['Louisville, KY',38.2527,-85.7585,0.94],['Oklahoma City, OK',35.4676,-97.5164,0.92],['Atlanta, GA',33.7490,-84.3880,1.02],['Miami, FL',25.7617,-80.1918,1.08],['Raleigh, NC',35.7796,-78.6382,0.99],['Kansas City, MO',39.0997,-94.5786,0.95],['Omaha, NE',41.2565,-95.9345,0.92],['Albuquerque, NM',35.0844,-106.6504,0.91],['Sacramento, CA',38.5816,-121.4944,1.12]
+].map(([name,lat,lng,cost])=>({name,lat,lng,cost}));
 
-const usCities = [
-  { name: 'Houston, TX', lat: 29.7604, lng: -95.3698, cost: 0.98 },
-  { name: 'San Antonio, TX', lat: 29.4241, lng: -98.4936, cost: 0.96 },
-  { name: 'Dallas, TX', lat: 32.7767, lng: -96.7970, cost: 1.0 },
-  { name: 'Austin, TX', lat: 30.2672, lng: -97.7431, cost: 1.09 },
-  { name: 'Fort Worth, TX', lat: 32.7555, lng: -97.3308, cost: 0.98 },
-  { name: 'El Paso, TX', lat: 31.7619, lng: -106.4850, cost: 0.92 },
-  { name: 'Arlington, TX', lat: 32.7357, lng: -97.1081, cost: 0.98 },
-  { name: 'Corpus Christi, TX', lat: 27.8006, lng: -97.3964, cost: 0.94 },
-  { name: 'Plano, TX', lat: 33.0198, lng: -96.6989, cost: 1.02 },
-  { name: 'Lubbock, TX', lat: 33.5779, lng: -101.8552, cost: 0.9 },
-  { name: 'Laredo, TX', lat: 27.5306, lng: -99.4803, cost: 0.91 },
-  { name: 'Irving, TX', lat: 32.8140, lng: -96.9489, cost: 0.99 },
-  { name: 'Garland, TX', lat: 32.9126, lng: -96.6389, cost: 0.98 },
-  { name: 'Amarillo, TX', lat: 35.2220, lng: -101.8313, cost: 0.9 },
-  { name: 'Grand Prairie, TX', lat: 32.7459, lng: -96.9978, cost: 0.98 },
-  { name: 'McKinney, TX', lat: 33.1972, lng: -96.6398, cost: 1.0 },
-  { name: 'Frisco, TX', lat: 33.1507, lng: -96.8236, cost: 1.02 },
-  { name: 'Brownsville, TX', lat: 25.9017, lng: -97.4975, cost: 0.9 },
-  { name: 'Pasadena, TX', lat: 29.6911, lng: -95.2091, cost: 0.95 },
-  { name: 'Killeen, TX', lat: 31.1171, lng: -97.7278, cost: 0.93 },
-  { name: 'Waco, TX', lat: 31.5493, lng: -97.1467, cost: 0.94 },
-  { name: 'McAllen, TX', lat: 26.2034, lng: -98.2300, cost: 0.91 },
-  { name: 'Denton, TX', lat: 33.2148, lng: -97.1331, cost: 0.97 },
-  { name: 'Midland, TX', lat: 31.9973, lng: -102.0779, cost: 0.93 },
-  { name: 'Abilene, TX', lat: 32.4487, lng: -99.7331, cost: 0.9 },
-  { name: 'New York, NY', lat: 40.7128, lng: -74.0060, cost: 1.23 },
-  { name: 'Los Angeles, CA', lat: 34.0522, lng: -118.2437, cost: 1.2 },
-  { name: 'Chicago, IL', lat: 41.8781, lng: -87.6298, cost: 1.1 },
-  { name: 'Phoenix, AZ', lat: 33.4484, lng: -112.0740, cost: 1.01 },
-  { name: 'Philadelphia, PA', lat: 39.9526, lng: -75.1652, cost: 1.07 },
-  { name: 'San Diego, CA', lat: 32.7157, lng: -117.1611, cost: 1.16 },
-  { name: 'San Jose, CA', lat: 37.3382, lng: -121.8863, cost: 1.19 },
-  { name: 'Jacksonville, FL', lat: 30.3322, lng: -81.6557, cost: 0.98 },
-  { name: 'Columbus, OH', lat: 39.9612, lng: -82.9988, cost: 0.96 },
-  { name: 'Charlotte, NC', lat: 35.2271, lng: -80.8431, cost: 0.98 },
-  { name: 'Indianapolis, IN', lat: 39.7684, lng: -86.1581, cost: 0.95 },
-  { name: 'Seattle, WA', lat: 47.6062, lng: -122.3321, cost: 1.17 },
-  { name: 'Denver, CO', lat: 39.7392, lng: -104.9903, cost: 1.08 },
-  { name: 'Boston, MA', lat: 42.3601, lng: -71.0589, cost: 1.19 },
-  { name: 'Nashville, TN', lat: 36.1627, lng: -86.7816, cost: 0.99 },
-  { name: 'Baltimore, MD', lat: 39.2904, lng: -76.6122, cost: 1.05 },
-  { name: 'Milwaukee, WI', lat: 43.0389, lng: -87.9065, cost: 0.97 },
-  { name: 'Portland, OR', lat: 45.5152, lng: -122.6784, cost: 1.1 },
-  { name: 'Las Vegas, NV', lat: 36.1699, lng: -115.1398, cost: 1.03 },
-  { name: 'Detroit, MI', lat: 42.3314, lng: -83.0458, cost: 0.95 },
-  { name: 'Memphis, TN', lat: 35.1495, lng: -90.0490, cost: 0.92 },
-  { name: 'Louisville, KY', lat: 38.2527, lng: -85.7585, cost: 0.94 },
-  { name: 'Oklahoma City, OK', lat: 35.4676, lng: -97.5164, cost: 0.92 },
-  { name: 'Atlanta, GA', lat: 33.7490, lng: -84.3880, cost: 1.02 },
-  { name: 'Miami, FL', lat: 25.7617, lng: -80.1918, cost: 1.08 },
-  { name: 'Raleigh, NC', lat: 35.7796, lng: -78.6382, cost: 0.99 },
-  { name: 'Kansas City, MO', lat: 39.0997, lng: -94.5786, cost: 0.95 },
-  { name: 'Omaha, NE', lat: 41.2565, lng: -95.9345, cost: 0.92 },
-  { name: 'Albuquerque, NM', lat: 35.0844, lng: -106.6504, cost: 0.91 },
-  { name: 'Sacramento, CA', lat: 38.5816, lng: -121.4944, cost: 1.12 },
-];
+const mfgData = [
+['SmartLam North America — Columbia Falls, MT',48.3725,-114.1810],['DR Johnson Wood — Riddle, OR',42.9504,-123.3645],['Vaagen Timbers — Colville, WA',48.5466,-117.9055],['Katerra Legacy CLT — Spokane Valley, WA',47.6732,-117.2394],['Freres Engineered Wood — Lyons, OR',44.7740,-122.6076],['Mercer Mass Timber — Conway, AR',35.0887,-92.4335],['Timberlab — Greenville, SC',34.8526,-82.3940],['Sterling Structural — Lufkin, TX',31.3382,-94.7291],['Boise Cascade Engineered Wood — Boise, ID',43.6150,-116.2023],['Rosboro Laminated — Springfield, OR',44.0462,-123.0220],['Weyerhaeuser Engineered Wood — Tacoma, WA',47.2529,-122.4443],['Binderholz North America — Live Oak, FL',30.2949,-82.9840],['Hasslacher Norica USA — Nashville, TN',36.1627,-86.7816],['International Beams — Myrtle Creek, OR',43.0207,-123.2928],['Structurlam Legacy — Okanogan, WA',48.3620,-119.5836],['Western Archrib — Edmonton, AB',53.5461,-113.4938],['Nordic Structures — Chibougamau, QC',49.9169,-74.3659],['Element5 — St. Thomas, ON',42.7778,-81.1824],['Mass Timber Services — Portland, OR',45.5152,-122.6784],['Seagate Structures — Idaho Falls, ID',43.4917,-112.0339]
+].map(([name,lat,lng])=>({name,lat,lng}));
 
-const timberManufacturers = [
-  { name: 'SmartLam North America — Columbia Falls, MT', lat: 48.3725, lng: -114.1810 },
-  { name: 'DR Johnson Wood — Riddle, OR', lat: 42.9504, lng: -123.3645 },
-  { name: 'Vaagen Timbers — Colville, WA', lat: 48.5466, lng: -117.9055 },
-  { name: 'Katerra Legacy CLT — Spokane Valley, WA', lat: 47.6732, lng: -117.2394 },
-  { name: 'Freres Engineered Wood — Lyons, OR', lat: 44.7740, lng: -122.6076 },
-  { name: 'Mercer Mass Timber — Conway, AR', lat: 35.0887, lng: -92.4335 },
-  { name: 'Timberlab — Greenville, SC', lat: 34.8526, lng: -82.3940 },
-  { name: 'Sterling Structural — Lufkin, TX', lat: 31.3382, lng: -94.7291 },
-  { name: 'Boise Cascade Engineered Wood — Boise, ID', lat: 43.6150, lng: -116.2023 },
-  { name: 'Rosboro Laminated — Springfield, OR', lat: 44.0462, lng: -123.0220 },
-  { name: 'Weyerhaeuser Engineered Wood — Tacoma, WA', lat: 47.2529, lng: -122.4443 },
-  { name: 'Binderholz North America — Live Oak, FL', lat: 30.2949, lng: -82.9840 },
-  { name: 'Hasslacher Norica USA — Nashville, TN', lat: 36.1627, lng: -86.7816 },
-  { name: 'International Beams — Myrtle Creek, OR', lat: 43.0207, lng: -123.2928 },
-  { name: 'Structurlam Legacy — Okanogan, WA', lat: 48.3620, lng: -119.5836 },
-  { name: 'Western Archrib — Edmonton, AB', lat: 53.5461, lng: -113.4938 },
-  { name: 'Nordic Structures — Chibougamau, QC', lat: 49.9169, lng: -74.3659 },
-  { name: 'Element5 — St. Thomas, ON', lat: 42.7778, lng: -81.1824 },
-  { name: 'Mass Timber Services — Portland, OR', lat: 45.5152, lng: -122.6784 },
-  { name: 'Seagate Structures — Idaho Falls, ID', lat: 43.4917, lng: -112.0339 },
-];
-
-const buildingTypes = [
-  'Education', 'Recreational', 'Library', 'Office', 'Residential', 'Healthcare', 'Hospitality', 'Mixed Use',
-  'Laboratory', 'Warehouse', 'Retail', 'Airport Terminal', 'Transit Hub', 'Justice/Courthouse', 'Religious',
-  'Museum', 'Data Center', 'Manufacturing'
-];
-
-const transportFactors = { truck: 0.11, rail: 0.03, ship: 0.015, multimodal: 0.055 };
-const speciesFactors = {
-  'douglas-fir': { density: 0.53, sequestration: -760, processFactor: 1.0 },
-  'spruce-pine-fir': { density: 0.46, sequestration: -690, processFactor: 0.96 },
-  'southern-yellow-pine': { density: 0.57, sequestration: -780, processFactor: 1.04 },
-  'hemlock-fir': { density: 0.49, sequestration: -710, processFactor: 0.99 },
+const buildingTypes = ['education','recreational','gymnasium','library','office','residential','healthcare','hospitality','mixed-use','laboratory','warehouse','retail','airport-terminal','transit-hub','justice-courthouse','religious','museum','data-center','manufacturing'];
+const marketCost = {
+  education:[355,335,328], recreational:[395,360,350], gymnasium:[385,352,342], library:[390,355,345], office:[380,350,338], residential:[340,320,315], healthcare:[460,430,420], hospitality:[410,385,375], 'mixed-use':[405,380,368], laboratory:[470,445,430], warehouse:[245,230,225], retail:[320,305,295], 'airport-terminal':[520,500,470], 'transit-hub':[440,420,395], 'justice-courthouse':[430,410,390], religious:[340,325,315], museum:[465,438,418], 'data-center':[510,480,455], manufacturing:[280,265,255]
+};
+const districtRules = {
+  'Austin, TX':{maxStories:5,maxHeightFt:85,requiredIBC:['IBC 2021','IBC 2024'],energy:['IECC 2021','IECC 2024']},
+  'Houston, TX':{maxStories:6,maxHeightFt:95,requiredIBC:['IBC 2018','IBC 2021'],energy:['IECC 2021']},
+  'Dallas, TX':{maxStories:6,maxHeightFt:95,requiredIBC:['IBC 2021'],energy:['IECC 2021']},
+  'San Antonio, TX':{maxStories:5,maxHeightFt:85,requiredIBC:['IBC 2021'],energy:['IECC 2021']},
+  default:{maxStories:6,maxHeightFt:100,requiredIBC:['IBC 2018','IBC 2021','IBC 2024'],energy:['IECC 2018','IECC 2021','IECC 2024','ASHRAE 90.1-2019']}
 };
 
-const map = L.map('map', { fullscreenControl: true }).setView([31.0, -99.0], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18, attribution: '&copy; OpenStreetMap' }).addTo(map);
-const manufacturerMarker = L.marker([48.3725, -114.181], { draggable: true }).addTo(map).bindPopup('Manufacturer Facility');
-const siteMarker = L.marker([30.2672, -97.7431], { draggable: true }).addTo(map).bindPopup('Project Site');
-const routeLine = L.polyline([manufacturerMarker.getLatLng(), siteMarker.getLatLng()], { color: '#1e66ff', weight: 3 }).addTo(map);
+const speciesFactors = {'douglas-fir':{density:0.53,seq:-760,f:1},'spruce-pine-fir':{density:0.46,seq:-690,f:0.96},'southern-yellow-pine':{density:0.57,seq:-780,f:1.04},'hemlock-fir':{density:0.49,seq:-710,f:0.99}};
+const transportFactors = {truck:0.11,rail:0.03,ship:0.015,multimodal:0.055};
 
-let carbonChart;
-let costChart;
-let mixChart;
-let currentRouteMiles = 0;
-let schoolStats = { count: 0, avgEnrollment: 0 };
+const schema = z.object({projectName:z.string().min(1),grossAreaFt2:z.coerce.number().min(0),stories:z.coerce.number().min(0),cltUsePercent:z.coerce.number().min(0).max(100)});
 
-const schema = z.object({
-  projectName: z.string().min(1, 'Project name is required'),
-  grossAreaFt2: z.coerce.number().min(0),
-  stories: z.coerce.number().min(0),
-  cltUsePercent: z.coerce.number().min(0).max(100),
-});
+const map = L.map('map', { fullscreenControl: true }).setView([31,-99],5);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
+const mfgMarker = L.marker([48.3725,-114.181],{draggable:true}).addTo(map);
+const siteMarker = L.marker([30.2672,-97.7431],{draggable:true}).addTo(map);
+const route = L.polyline([mfgMarker.getLatLng(),siteMarker.getLatLng()],{color:'#1f68ff',weight:3}).addTo(map);
 
-function num(fd, key, fallback = 0) {
-  const raw = fd.get(key);
-  if (raw === '' || raw == null) return fallback;
-  const parsed = Number(raw);
-  return Number.isFinite(parsed) ? parsed : fallback;
+let carbonChart,costChart,mixChart,riskChart,schoolFacts={five:0,ten:0,avgEnroll:0};
+
+const byId = (id)=>document.getElementById(id);
+const btn = {site:byId('site-lookup-btn'), est:byId('estimate-btn'), opt:byId('optional-toggle'), ors:byId('ors-route-btn'), mapillary:byId('mapillary-btn'), cesium:byId('cesium-btn'), pdf:byId('export-pdf-btn')};
+
+const num = (fd,k,d=0)=>{const r=fd.get(k); const n=Number(r); return (r===''||r==null||!Number.isFinite(n))?d:n;};
+const parseFtIn = (s)=>{if(!s) return 0; const m=s.match(/(\d+)\s*'\s*(\d+)?/); return m?Number(m[1])+Number(m[2]||0)/12:0;};
+const miles = (a,b)=>{const rad=(d)=>d*Math.PI/180; const R=3958.8; const dLat=rad(b.lat-a.lat), dLng=rad(b.lng-a.lng); const x=Math.sin(dLat/2)**2+Math.cos(rad(a.lat))*Math.cos(rad(b.lat))*Math.sin(dLng/2)**2; return 2*R*Math.asin(Math.sqrt(x));};
+
+function populate() {
+  projectCitySelect.innerHTML = cityData.map((c,i)=>`<option value="${i}">${c.name}</option>`).join('');
+  manufacturerSelect.innerHTML = mfgData.map((m,i)=>`<option value="${i}">${m.name}</option>`).join('');
+  buildingTypeSelect.innerHTML = buildingTypes.map((t)=>`<option value="${t}">${t.replace(/-/g,' ').replace(/\b\w/g,(x)=>x.toUpperCase())}</option>`).join('');
+  buildingTypeSelect.value='gymnasium';
 }
 
-function parseFtIn(text) {
-  if (!text) return 0;
-  const m = text.match(/(\d+)\s*'\s*(\d+)?/);
-  if (!m) return 0;
-  return Number(m[1] || 0) + Number(m[2] || 0) / 12;
+function autoSuggestCosts() {
+  const t = form.elements.buildingType.value;
+  const c = cityData[Number(projectCitySelect.value)] || cityData[0];
+  const [timber,steel,concrete] = marketCost[t] || marketCost.education;
+  if (!form.elements.timberCostPerFt2.value) form.elements.timberCostPerFt2.value = Math.round(timber*c.cost);
+  if (!form.elements.steelCostPerFt2.value) form.elements.steelCostPerFt2.value = Math.round(steel*c.cost);
+  if (!form.elements.concreteCostPerFt2.value) form.elements.concreteCostPerFt2.value = Math.round(concrete*c.cost);
 }
 
-function haversineMiles(a, b) {
-  const rad = (d) => (d * Math.PI) / 180;
-  const r = 3958.8;
-  const dLat = rad(b.lat - a.lat);
-  const dLng = rad(b.lng - a.lng);
-  const x = Math.sin(dLat / 2) ** 2 + Math.cos(rad(a.lat)) * Math.cos(rad(b.lat)) * Math.sin(dLng / 2) ** 2;
-  return 2 * r * Math.asin(Math.sqrt(x));
-}
-
-function populateSelect(select, data) {
-  select.innerHTML = data.map((x, i) => `<option value="${i}">${x.name}</option>`).join('');
-}
-
-function populateBuildingTypes() {
-  buildingTypeSelect.innerHTML = buildingTypes.map((t) => `<option value="${t.toLowerCase().replace(/\s+/g, '-')}">${t}</option>`).join('');
-  buildingTypeSelect.value = 'recreational';
-}
-
-function estimateFromType(fd) {
-  const type = fd.get('buildingType') || 'education';
-  const occupancy = num(fd, 'occupancy', 600);
-  const areaPerPerson = ({'library': 160, 'recreational': 145, 'education': 120, 'office': 140, 'residential': 320, 'healthcare': 240}[type]) || 150;
-  const grossAreaFt2 = num(fd, 'grossAreaFt2', 0) || occupancy * areaPerPerson;
-  const stories = num(fd, 'stories', 0) || Math.max(1, Math.round(grossAreaFt2 / 28000));
-  const floorPlateFt2 = num(fd, 'floorPlateFt2', 0) || grossAreaFt2 / stories;
-  const heightFt = parseFtIn(fd.get('heightFtIn')) || stories * 14;
-
-  return {
-    grossAreaFt2,
-    stories,
-    floorPlateFt2,
-    heightFt,
-    cltFt3: num(fd, 'cltFt3', 0) || grossAreaFt2 * 0.75,
-    glulamFt3: num(fd, 'glulamFt3', 0) || grossAreaFt2 * 0.2,
-    lvlFt3: num(fd, 'lvlFt3', 0) || grossAreaFt2 * 0.06,
-    nltFt3: num(fd, 'nltFt3', 0) || grossAreaFt2 * 0.04,
-    dltFt3: num(fd, 'dltFt3', 0) || grossAreaFt2 * 0.03,
-  };
-}
-
-function updateSolar(lat, lng) {
-  const solar = window.SunCalc.getTimes(new Date(), lat, lng);
-  solarPeakEl.textContent = solar.solarNoon ? solar.solarNoon.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'N/A';
+function syncMap() {
+  const city = cityData[Number(projectCitySelect.value)] || cityData[0];
+  const m = mfgData[Number(manufacturerSelect.value)] || mfgData[0];
+  siteMarker.setLatLng([city.lat, city.lng]);
+  mfgMarker.setLatLng([m.lat, m.lng]);
+  map.fitBounds(L.latLngBounds([siteMarker.getLatLng(), mfgMarker.getLatLng()]), {padding:[40,40]});
+  updateDistance();
+  autoSuggestCosts();
 }
 
 function updateDistance() {
-  const m = manufacturerMarker.getLatLng();
-  const s = siteMarker.getLatLng();
-  routeLine.setLatLngs([m, s]);
-  currentRouteMiles = haversineMiles(m, s);
-  distanceLabel.textContent = `${currentRouteMiles.toFixed(0)} mi`;
-  updateSolar(s.lat, s.lng);
-  return currentRouteMiles;
+  route.setLatLngs([mfgMarker.getLatLng(), siteMarker.getLatLng()]);
+  const d = miles(mfgMarker.getLatLng(), siteMarker.getLatLng());
+  distanceLabel.textContent = `${d.toFixed(0)} mi`;
+  const t = SunCalc.getTimes(new Date(), siteMarker.getLatLng().lat, siteMarker.getLatLng().lng);
+  solarPeakEl.textContent = t.solarNoon ? t.solarNoon.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'N/A';
+  return d;
 }
 
-function syncMapFromSelections() {
-  const city = usCities[Number(projectCitySelect.value)] || usCities[0];
-  const mfg = timberManufacturers[Number(manufacturerSelect.value)] || timberManufacturers[0];
-  siteMarker.setLatLng([city.lat, city.lng]);
-  manufacturerMarker.setLatLng([mfg.lat, mfg.lng]);
-  map.fitBounds(L.latLngBounds([siteMarker.getLatLng(), manufacturerMarker.getLatLng()]), { padding: [40, 40] });
-  updateDistance();
+function estimate(fd) {
+  const type = fd.get('buildingType') || 'education';
+  const occ = num(fd,'occupancy',700);
+  const perPerson = ({gymnasium:120,recreational:145,library:160,education:120,office:140,residential:320,healthcare:240}[type]) || 150;
+  const gross = num(fd,'grossAreaFt2',0) || occ * perPerson;
+  const stories = num(fd,'stories',0) || Math.max(1,Math.round(gross/28000));
+  const plate = num(fd,'floorPlateFt2',0) || gross/stories;
+  const h = parseFtIn(fd.get('heightFtIn')) || stories*14;
+  return {gross,stories,plate,height:h,clt:num(fd,'cltFt3',0)||gross*0.8,glu:num(fd,'glulamFt3',0)||gross*0.2,lvl:num(fd,'lvlFt3',0)||gross*0.06,nlt:num(fd,'nltFt3',0)||gross*0.04,dlt:num(fd,'dltFt3',0)||gross*0.03};
 }
 
-async function geocodeSite(query) {
-  const url = `https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(query)}`;
-  const res = await fetch(url, { headers: { 'Accept-Language': 'en-US' } });
+function complianceCheck(fd, est) {
+  const city = cityData[Number(projectCitySelect.value)]?.name;
+  const rule = districtRules[city] || districtRules.default;
+  const flags = [];
+  if (est.stories > rule.maxStories) flags.push(`Stories exceed district guideline (${rule.maxStories} max).`);
+  if (est.height > rule.maxHeightFt) flags.push(`Height exceeds district guideline (${rule.maxHeightFt} ft max).`);
+  if (!rule.requiredIBC.includes(fd.get('ibcVersion'))) flags.push('Selected IBC not preferred by local district guideline.');
+  if (!rule.energy.includes(fd.get('energyCode'))) flags.push('Selected energy code differs from preferred district guideline.');
+  const score = Math.max(0, 100 - flags.length * 22);
+  return {score, flags, rule};
+}
+
+async function fetchSchoolsByRadius(lat,lng,mi) {
+  const url = `https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Public_Schools/FeatureServer/0/query?f=json&geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&distance=${mi}&units=esriSRUnit_StatuteMile&outFields=ENROLLMENT&returnGeometry=false`;
+  const res = await fetch(url);
   const data = await res.json();
-  if (!data?.length) throw new Error('No result found');
-  return { lat: Number(data[0].lat), lng: Number(data[0].lon), display: data[0].display_name };
+  const features = data?.features || [];
+  const enroll = features.map((f)=>Number(f.attributes?.ENROLLMENT||0)).filter(Boolean);
+  const avg = enroll.length ? enroll.reduce((a,b)=>a+b,0)/enroll.length : 0;
+  return {count:features.length, avg};
 }
 
-async function fetchOrsRouteMiles(apiKey) {
-  const a = manufacturerMarker.getLatLng();
-  const b = siteMarker.getLatLng();
-  const response = await fetch('https://api.openrouteservice.org/v2/directions/driving-car', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: apiKey },
-    body: JSON.stringify({ coordinates: [[a.lng, a.lat], [b.lng, b.lat]] }),
-  });
-  const data = await response.json();
-  const meters = data?.routes?.[0]?.summary?.distance;
-  if (!meters) throw new Error('No route distance returned');
-  return meters * 0.000621371;
-}
-
-async function fetchArcgisSchoolStats(lat, lng) {
-  const url = `https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/Public_Schools/FeatureServer/0/query?f=json&geometry=${lng},${lat}&geometryType=esriGeometryPoint&inSR=4326&spatialRel=esriSpatialRelIntersects&distance=25&units=esriSRUnit_StatuteMile&outFields=ENROLLMENT&returnGeometry=false`;
+async function updateSchoolFacts() {
   try {
-    const res = await fetch(url);
-    const data = await res.json();
-    const features = data?.features || [];
-    const enrollments = features.map((f) => Number(f.attributes?.ENROLLMENT || 0)).filter((x) => x > 0);
-    const avgEnrollment = enrollments.length ? enrollments.reduce((a, b) => a + b, 0) / enrollments.length : 0;
-    schoolStats = { count: features.length, avgEnrollment };
+    const s = siteMarker.getLatLng();
+    const five = await fetchSchoolsByRadius(s.lat,s.lng,5);
+    const ten = await fetchSchoolsByRadius(s.lat,s.lng,10);
+    schoolFacts = {five:five.count, ten:ten.count, avgEnroll: ten.avg};
   } catch {
-    schoolStats = { count: 0, avgEnrollment: 0 };
+    schoolFacts = {five:0, ten:0, avgEnroll:0};
   }
+}
+
+async function geocodeSite(q) {
+  const r = await fetch(`https://nominatim.openstreetmap.org/search?format=json&limit=1&q=${encodeURIComponent(q)}`, {headers:{'Accept-Language':'en-US'}});
+  const d = await r.json();
+  if (!d?.length) throw new Error('No result found');
+  return {lat:Number(d[0].lat), lng:Number(d[0].lon), display:d[0].display_name};
+}
+
+async function orsMiles(key) {
+  const a=mfgMarker.getLatLng(), b=siteMarker.getLatLng();
+  const r=await fetch('https://api.openrouteservice.org/v2/directions/driving-car',{method:'POST',headers:{'Content-Type':'application/json',Authorization:key},body:JSON.stringify({coordinates:[[a.lng,a.lat],[b.lng,b.lat]]})});
+  const d=await r.json();
+  const m=d?.routes?.[0]?.summary?.distance; if(!m) throw new Error('No route result');
+  return m*0.000621371;
 }
 
 function calculate(fd, routeMiles) {
-  const est = estimateFromType(fd);
+  const est = estimate(fd);
   const species = speciesFactors[fd.get('timberSpecies')] || speciesFactors['douglas-fir'];
-  const transportMode = fd.get('transportMode') || 'truck';
-  const waste = num(fd, 'wasteFactor', 0) / 100;
-  const cltShare = num(fd, 'cltUsePercent', 0) / 100;
+  const waste = num(fd,'wasteFactor',0)/100;
+  const cltShare = num(fd,'cltUsePercent',0)/100;
+  const totalFt3=(est.clt+est.glu+est.lvl+est.nlt+est.dlt)*(1+waste);
+  const totalM3=totalFt3*0.0283168;
+  const mass=totalM3*species.density;
+  const grid=num(fd,'gridIntensity',0.32), renew=num(fd,'renewableShare',35)/100, fire=num(fd,'fireRating',2);
+  const complexity=1+est.height/400+fire*0.02;
+  const transport=transportFactors[fd.get('transportMode')]||0.11;
 
-  const totalFt3 = (est.cltFt3 + est.glulamFt3 + est.lvlFt3 + est.nltFt3 + est.dltFt3) * (1 + waste);
-  const totalM3 = totalFt3 * 0.0283168;
-  const timberMass = totalM3 * species.density;
-  const grid = num(fd, 'gridIntensity', 0.32);
-  const renew = num(fd, 'renewableShare', 35) / 100;
-  const fire = num(fd, 'fireRating', 2);
-  const complexity = 1 + est.heightFt / 400 + fire * 0.02;
+  const carbonTimber = totalM3*115*species.f + mass*routeMiles*transport + est.gross*0.85*grid*(1-renew) + totalM3*species.seq;
+  const carbonSteel = est.gross*22*complexity + routeMiles*180;
+  const carbonConcrete = est.gross*14*complexity + routeMiles*120;
 
-  const timberCarbon = totalM3 * 115 * species.processFactor + timberMass * routeMiles * (transportFactors[transportMode] || 0.11) + est.grossAreaFt2 * 0.85 * grid * (1 - renew) + totalM3 * species.sequestration;
-  const steelCarbon = est.grossAreaFt2 * 22 * complexity + routeMiles * 180;
-  const concreteCarbon = est.grossAreaFt2 * 14 * complexity + routeMiles * 120;
+  const city = cityData[Number(projectCitySelect.value)] || cityData[0];
+  const costT = num(fd,'timberCostPerFt2',365), costS=num(fd,'steelCostPerFt2',340), costC=num(fd,'concreteCostPerFt2',330);
+  const timberCost = est.gross*costT*city.cost, steelCost=est.gross*costS*city.cost, concreteCost=est.gross*costC*city.cost;
 
-  const city = usCities[Number(projectCitySelect.value)] || { cost: 1 };
-  const timberRate = num(fd, 'timberCostPerFt2', 365);
-  const steelRate = num(fd, 'steelCostPerFt2', 340);
-  const concreteRate = num(fd, 'concreteCostPerFt2', 330);
-
-  const timberCost = est.grossAreaFt2 * timberRate * city.cost;
-  const steelCost = est.grossAreaFt2 * steelRate * city.cost;
-  const concreteCost = est.grossAreaFt2 * concreteRate * city.cost;
-
-  return { est, cltShare, complexity, carbon: { timber: timberCarbon, steel: steelCarbon, concrete: concreteCarbon }, cost: { timber: timberCost, steel: steelCost, concrete: concreteCost } };
+  return {est, complexity, cltShare, carbon:{timber:carbonTimber,steel:carbonSteel,concrete:carbonConcrete}, cost:{timber:timberCost,steel:steelCost,concrete:concreteCost}, transportImpact: mass*routeMiles*transport};
 }
 
-function fmtKg(v) { return `${Math.round(v).toLocaleString()} kg CO₂e`; }
-function fmtMoney(v) { return `$${Math.round(v).toLocaleString()}`; }
+function fmtKg(v){return `${Math.round(v).toLocaleString()} kg CO₂e`;}
+function fmtMoney(v){return `$${Math.round(v).toLocaleString()}`;}
 
-function drawCharts(result) {
-  if (carbonChart) carbonChart.destroy();
-  if (costChart) costChart.destroy();
-  if (mixChart) mixChart.destroy();
+function drawCharts(res, compliance) {
+  const make = (id)=>document.getElementById(id);
+  carbonChart?.destroy(); costChart?.destroy(); mixChart?.destroy(); riskChart?.destroy();
 
-  carbonChart = new Chart(document.getElementById('carbon-canvas'), {
-    type: 'bar',
-    data: { labels: ['Timber', 'Steel', 'Concrete'], datasets: [{ data: [result.carbon.timber, result.carbon.steel, result.carbon.concrete], backgroundColor: ['#15a364', '#d84a4a', '#ea8a2a'] }] },
-    options: { plugins: { legend: { display: false } } },
-  });
-
-  costChart = new Chart(document.getElementById('cost-canvas'), {
-    type: 'doughnut',
-    data: { labels: ['Timber', 'Steel', 'Concrete'], datasets: [{ data: [result.cost.timber, result.cost.steel, result.cost.concrete], backgroundColor: ['#4f79ff', '#b957ff', '#5bb6ff'] }] },
-  });
-
-  mixChart = new Chart(document.getElementById('mix-canvas'), {
-    type: 'radar',
-    data: { labels: ['CLT', 'Glulam', 'LVL', 'NLT', 'DLT'], datasets: [{ data: [result.est.cltFt3, result.est.glulamFt3, result.est.lvlFt3, result.est.nltFt3, result.est.dltFt3], borderColor: '#1e66ff', backgroundColor: 'rgba(30,102,255,.2)' }] },
-    options: { plugins: { legend: { display: false } } },
-  });
+  carbonChart = new Chart(make('carbon-canvas'), {type:'bar',data:{labels:['Timber','Steel','Concrete'],datasets:[{data:[res.carbon.timber,res.carbon.steel,res.carbon.concrete],backgroundColor:['#13a360','#d84a4a','#ea8a2a'],borderRadius:8}]},options:{plugins:{legend:{display:false}}}});
+  costChart = new Chart(make('cost-canvas'), {type:'line',data:{labels:['Timber','Steel','Concrete'],datasets:[{data:[res.cost.timber,res.cost.steel,res.cost.concrete],borderColor:'#376bff',backgroundColor:'rgba(55,107,255,0.18)',fill:true,tension:.35}]},options:{plugins:{legend:{display:false}}}});
+  mixChart = new Chart(make('mix-canvas'), {type:'radar',data:{labels:['CLT','Glulam','LVL','NLT','DLT'],datasets:[{data:[res.est.clt,res.est.glu,res.est.lvl,res.est.nlt,res.est.dlt],borderColor:'#1f68ff',backgroundColor:'rgba(31,104,255,.18)'}]},options:{plugins:{legend:{display:false}}}});
+  riskChart = new Chart(make('risk-canvas'), {type:'doughnut',data:{labels:['Compliance Score','Gap'],datasets:[{data:[compliance.score,100-compliance.score],backgroundColor:['#13a360','#f2c9c9']}]},options:{plugins:{legend:{position:'bottom'}}}});
 }
 
-function setFunFacts(result) {
-  const carbonSavings = Math.max(0, result.carbon.steel - result.carbon.timber);
-  const treeYears = carbonSavings / 21;
-  const carMiles = carbonSavings / 0.404;
-  const schoolEquivalent = schoolStats.avgEnrollment ? (num(new FormData(form), 'occupancy', 0) / schoolStats.avgEnrollment) : 0;
+function renderReportGrid(res, compliance) {
+  const carbonIntensity = res.carbon.timber / Math.max(res.est.gross,1);
+  const costIntensity = res.cost.timber / Math.max(res.est.gross,1);
+  const pctVsSteel = ((res.carbon.steel - res.carbon.timber) / Math.max(res.carbon.steel,1)) * 100;
+  const transportPct = (res.transportImpact / Math.max(Math.abs(res.carbon.timber),1)) * 100;
 
-  funFacts.innerHTML = `
-    <strong>Fun Facts</strong><br>
-    • Timber scenario saves about <strong>${Math.round(treeYears).toLocaleString()}</strong> tree-year equivalents vs steel.<br>
-    • Carbon difference is about <strong>${Math.round(carMiles).toLocaleString()}</strong> passenger car miles.<br>
-    • Nearby public schools within ~25 miles (ArcGIS): <strong>${schoolStats.count.toLocaleString()}</strong>.<br>
-    • Your occupancy is ~<strong>${schoolEquivalent ? schoolEquivalent.toFixed(2) : 'N/A'}</strong>x the average nearby school enrollment.
-  `;
+  const cards = [
+    ['Carbon Intensity', `${carbonIntensity.toFixed(2)} kgCO₂e/ft²`],
+    ['Cost Intensity', `${costIntensity.toFixed(2)} $/ft²`],
+    ['Reduction vs Steel', `${pctVsSteel.toFixed(1)}%`],
+    ['Transport Impact', `${transportPct.toFixed(1)}% of timber carbon`],
+    ['5-mile Public Schools', schoolFacts.five.toLocaleString()],
+    ['10-mile Public Schools', schoolFacts.ten.toLocaleString()],
+    ['Avg Nearby School Enrollment', schoolFacts.avgEnroll ? Math.round(schoolFacts.avgEnroll).toLocaleString() : 'N/A'],
+    ['Compliance Score', `${compliance.score}/100`],
+    ['District Max Stories', compliance.rule.maxStories],
+    ['District Max Height', `${compliance.rule.maxHeightFt} ft`],
+  ];
+  reportGrid.innerHTML = cards.map(([k,v])=>`<article class="report-card"><p>${k}</p><h4>${v}</h4></article>`).join('');
 }
 
-async function handleSubmit(event) {
+function renderFunAndSuggestions(fd,res,compliance) {
+  const pname = fd.get('projectName') || 'Project';
+  const btype = fd.get('buildingType');
+  const saved = Math.max(0, res.carbon.steel - res.carbon.timber);
+  const cars = saved / 0.404;
+  const treeYears = saved / 21;
+  funFacts.innerHTML = `<strong>Project Fun Facts (${pname})</strong><br>• For this ${btype.replace(/-/g,' ')} scenario, carbon savings vs steel are like avoiding <strong>${Math.round(cars).toLocaleString()}</strong> car miles.<br>• Equivalent to roughly <strong>${Math.round(treeYears).toLocaleString()}</strong> tree-year sequestration credits.<br>• Within 5 miles: <strong>${schoolFacts.five}</strong> public schools; within 10 miles: <strong>${schoolFacts.ten}</strong>.`;
+
+  const recs = [];
+  if (res.cltShare < 0.55) recs.push('Increase CLT share toward ~55–70% to improve timber carbon performance.');
+  if (res.transportImpact > Math.abs(res.carbon.timber)*0.15) recs.push('Consider nearer fabrication facility or rail mode to reduce logistics impact.');
+  if (compliance.flags.length) recs.push('Resolve district/code flags before SD milestone to reduce redesign risk.');
+  if (num(fd,'renewableShare',0) < 30) recs.push('Target >30% renewable fabrication energy for lower embodied emissions.');
+  if (num(fd,'wasteFactor',0) > 8) recs.push('Improve prefabrication planning to reduce waste below 8%.');
+  if (!recs.length) recs.push('Current assumptions are balanced. Next step: verify with supplier EPD and district manual alignment.');
+
+  recommendationsEl.innerHTML = `<strong>Design Suggestions</strong><ul>${recs.map((r)=>`<li>${r}</li>`).join('')}</ul>`;
+}
+
+async function submit(event){
   event.preventDefault();
   const fd = new FormData(form);
+  const valid = schema.safeParse({projectName:fd.get('projectName'),grossAreaFt2:fd.get('grossAreaFt2')||0,stories:fd.get('stories')||0,cltUsePercent:fd.get('cltUsePercent')||0});
+  if(!valid.success){resultsSummary.innerHTML=`<strong>Validation error:</strong> ${valid.error.issues[0].message}`;return;}
 
-  const validation = schema.safeParse({
-    projectName: fd.get('projectName'),
-    grossAreaFt2: fd.get('grossAreaFt2') || 0,
-    stories: fd.get('stories') || 0,
-    cltUsePercent: fd.get('cltUsePercent') || 0,
-  });
-  if (!validation.success) {
-    resultsSummary.innerHTML = `<strong>Validation error:</strong> ${validation.error.issues[0].message}`;
-    return;
-  }
+  const d = updateDistance();
+  await updateSchoolFacts();
+  const res = calculate(fd,d);
+  const comp = complianceCheck(fd,res.est);
 
-  const routeMiles = updateDistance();
-  await fetchArcgisSchoolStats(siteMarker.getLatLng().lat, siteMarker.getLatLng().lng);
-  const result = calculate(fd, routeMiles);
+  timberTotal.textContent = fmtKg(res.carbon.timber);
+  const dS = res.carbon.steel - res.carbon.timber, dC = res.carbon.concrete - res.carbon.timber;
+  steelSavings.textContent = `${Math.round(Math.abs(dS)).toLocaleString()} kg ${dS>=0?'lower':'higher'}`;
+  concreteSavings.textContent = `${Math.round(Math.abs(dC)).toLocaleString()} kg ${dC>=0?'lower':'higher'}`;
+  timberCostEl.textContent = fmtMoney(res.cost.timber);
+  complianceScoreEl.textContent = `${comp.score}/100`;
 
-  const deltaSteel = result.carbon.steel - result.carbon.timber;
-  const deltaConcrete = result.carbon.concrete - result.carbon.timber;
+  drawCharts(res, comp);
+  renderReportGrid(res, comp);
+  renderFunAndSuggestions(fd,res,comp);
 
-  timberTotal.textContent = fmtKg(result.carbon.timber);
-  steelSavings.textContent = `${Math.round(Math.abs(deltaSteel)).toLocaleString()} kg ${deltaSteel >= 0 ? 'lower' : 'higher'}`;
-  concreteSavings.textContent = `${Math.round(Math.abs(deltaConcrete)).toLocaleString()} kg ${deltaConcrete >= 0 ? 'lower' : 'higher'}`;
-  timberCostEl.textContent = fmtMoney(result.cost.timber);
-
-  drawCharts(result);
-  setFunFacts(result);
-
-  resultsSummary.innerHTML = `
-    <p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(result.est.grossAreaFt2).toLocaleString()} ft²</strong>.</p>
-    <p>Timber: <strong>${fmtKg(result.carbon.timber)}</strong> | Steel: <strong>${fmtKg(result.carbon.steel)}</strong> | Concrete: <strong>${fmtKg(result.carbon.concrete)}</strong>.</p>
-    <p>Costs — Timber: <strong>${fmtMoney(result.cost.timber)}</strong>, Steel: <strong>${fmtMoney(result.cost.steel)}</strong>, Concrete: <strong>${fmtMoney(result.cost.concrete)}</strong>.</p>
-  `;
-  assumptions.innerHTML = `Route ${routeMiles.toFixed(1)} mi • Complexity ${result.complexity.toFixed(2)} • CLT share ${Math.round(result.cltShare * 100)}% • Optional blanks were estimated.`;
+  resultsSummary.innerHTML = `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`;
+  assumptions.innerHTML = `Route ${d.toFixed(1)} mi • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`;
 }
 
-siteLookupBtn.addEventListener('click', async () => {
-  const query = form.elements.siteQuery.value.trim();
-  if (!query) return;
-  try {
-    const found = await geocodeSite(query);
-    siteMarker.setLatLng([found.lat, found.lng]);
-    map.panTo([found.lat, found.lng]);
-    resultsSummary.innerHTML = `<p><strong>Site found:</strong> ${found.display}</p>`;
-    updateDistance();
-  } catch (err) {
-    resultsSummary.innerHTML = `<p><strong>Lookup failed:</strong> ${err.message}</p>`;
-  }
+btn.site.addEventListener('click', async ()=>{
+  const q=form.elements.siteQuery.value.trim(); if(!q) return;
+  try{const f=await geocodeSite(q); siteMarker.setLatLng([f.lat,f.lng]); map.panTo([f.lat,f.lng]); resultsSummary.innerHTML=`<p><strong>Site found:</strong> ${f.display}</p>`; updateDistance();}
+  catch(e){resultsSummary.innerHTML=`<p><strong>Lookup failed:</strong> ${e.message}</p>`;}
 });
 
-estimateBtn.addEventListener('click', () => {
-  const est = estimateFromType(new FormData(form));
-  form.elements.grossAreaFt2.value = Math.round(est.grossAreaFt2);
-  form.elements.floorPlateFt2.value = Math.round(est.floorPlateFt2);
-  form.elements.stories.value = Math.round(est.stories);
-  form.elements.heightFtIn.value = `${Math.floor(est.heightFt)}' ${Math.round((est.heightFt % 1) * 12)}"`;
-  form.elements.cltFt3.value = Math.round(est.cltFt3);
-  form.elements.glulamFt3.value = Math.round(est.glulamFt3);
-  form.elements.lvlFt3.value = Math.round(est.lvlFt3);
-  form.elements.nltFt3.value = Math.round(est.nltFt3);
-  form.elements.dltFt3.value = Math.round(est.dltFt3);
-  resultsSummary.innerHTML = '<p><strong>Auto-estimate complete.</strong> Estimated quantities now populated for clarity.</p>';
+btn.est.addEventListener('click', ()=>{
+  const e=estimate(new FormData(form));
+  form.elements.grossAreaFt2.value=Math.round(e.gross);
+  form.elements.floorPlateFt2.value=Math.round(e.plate);
+  form.elements.stories.value=Math.round(e.stories);
+  form.elements.heightFtIn.value=`${Math.floor(e.height)}' ${Math.round((e.height%1)*12)}"`;
+  form.elements.cltFt3.value=Math.round(e.clt);
+  form.elements.glulamFt3.value=Math.round(e.glu);
+  form.elements.lvlFt3.value=Math.round(e.lvl);
+  form.elements.nltFt3.value=Math.round(e.nlt);
+  form.elements.dltFt3.value=Math.round(e.dlt);
+  autoSuggestCosts();
 });
 
-let optionalHidden = false;
-optionalToggleBtn.addEventListener('click', () => {
-  optionalHidden = !optionalHidden;
-  form.classList.toggle('optional-hidden', optionalHidden);
+let optionalHidden=false;
+btn.opt.addEventListener('click', ()=>{optionalHidden=!optionalHidden; form.classList.toggle('optional-hidden', optionalHidden);});
+
+btn.ors.addEventListener('click', async ()=>{
+  const key=form.elements.orsApiKey.value.trim(); if(!key){resultsSummary.innerHTML='<p><strong>ORS:</strong> add an API key.</p>'; return;}
+  try{const m=await orsMiles(key); distanceLabel.textContent=`${m.toFixed(0)} mi`; resultsSummary.innerHTML=`<p><strong>ORS route distance:</strong> ${m.toFixed(1)} mi.</p>`;}
+  catch(e){resultsSummary.innerHTML=`<p><strong>ORS failed:</strong> ${e.message}</p>`; updateDistance();}
 });
 
-orsRouteBtn.addEventListener('click', async () => {
-  const key = form.elements.orsApiKey.value.trim();
-  if (!key) {
-    resultsSummary.innerHTML = '<p><strong>ORS:</strong> add an API key first.</p>';
-    return;
-  }
-  try {
-    const miles = await fetchOrsRouteMiles(key);
-    currentRouteMiles = miles;
-    distanceLabel.textContent = `${miles.toFixed(0)} mi`;
-    resultsSummary.innerHTML = `<p><strong>ORS route distance:</strong> ${miles.toFixed(1)} mi.</p>`;
-  } catch (e) {
-    resultsSummary.innerHTML = `<p><strong>ORS failed:</strong> ${e.message}. Reverting to straight-line distance.</p>`;
-    updateDistance();
-  }
+btn.mapillary.addEventListener('click', ()=>{
+  const t=form.elements.mapillaryToken.value.trim();
+  const s=siteMarker.getLatLng();
+  imageryPanel.innerHTML=t?`Open street imagery: <a href="https://www.mapillary.com/app/?lat=${s.lat}&lng=${s.lng}&z=16" target="_blank" rel="noreferrer">Mapillary Viewer</a>`:'Add token, then click again for street imagery link.';
 });
 
-mapillaryBtn.addEventListener('click', () => {
-  const token = form.elements.mapillaryToken.value.trim();
-  const s = siteMarker.getLatLng();
-  imageryPanel.innerHTML = token
-    ? `Mapillary viewer near site: <a target="_blank" rel="noreferrer" href="https://www.mapillary.com/app/?lat=${s.lat}&lng=${s.lng}&z=16">Open Mapillary</a>`
-    : 'Please add a Mapillary token. Then click again to launch a site-adjacent map link.';
+btn.cesium.addEventListener('click', ()=>{
+  const t=form.elements.cesiumToken.value.trim(), tiles=form.elements.tilesetUrl.value.trim(), col=form.elements.colladaUrl.value.trim();
+  cesiumPanel.innerHTML=`Cesium setup: ${t?'token set':'token missing'} • tiles: ${tiles||'none'} • collada: ${col||'none'}`;
 });
 
-cesiumBtn.addEventListener('click', () => {
-  const token = form.elements.cesiumToken.value.trim();
-  const tiles = form.elements.tilesetUrl.value.trim();
-  const collada = form.elements.colladaUrl.value.trim();
-  cesiumPanel.innerHTML = `Cesium status: ${token ? 'token provided' : 'no token'} • 3D Tiles: ${tiles || 'not set'} • COLLADA: ${collada || 'not set'}`;
+btn.pdf.addEventListener('click', async ()=>{
+  const canvas=await html2canvas(document.querySelector('.panel:last-child')); const img=canvas.toDataURL('image/png');
+  const pdf=new window.jspdf.jsPDF('p','mm','a4'); const w=190; const h=(canvas.height*w)/canvas.width; pdf.addImage(img,'PNG',10,10,w,Math.min(h,270)); pdf.save('mass-timber-report.pdf');
 });
 
-exportPdfBtn.addEventListener('click', async () => {
-  const canvas = await html2canvas(document.querySelector('.panel:last-child'));
-  const img = canvas.toDataURL('image/png');
-  const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
-  const width = 190;
-  const height = (canvas.height * width) / canvas.width;
-  pdf.addImage(img, 'PNG', 10, 10, width, Math.min(270, height));
-  pdf.save('mass-timber-report.pdf');
-});
-
-form.addEventListener('submit', handleSubmit);
-projectCitySelect.addEventListener('change', syncMapFromSelections);
-manufacturerSelect.addEventListener('change', syncMapFromSelections);
-manufacturerMarker.on('dragend', updateDistance);
+form.addEventListener('submit', submit);
+projectCitySelect.addEventListener('change', syncMap);
+manufacturerSelect.addEventListener('change', syncMap);
+buildingTypeSelect.addEventListener('change', autoSuggestCosts);
+mfgMarker.on('dragend', updateDistance);
 siteMarker.on('dragend', updateDistance);
 
-populateSelect(projectCitySelect, usCities);
-populateSelect(manufacturerSelect, timberManufacturers);
-populateBuildingTypes();
-projectCitySelect.value = '3';
-manufacturerSelect.value = '0';
-syncMapFromSelections();
+populate();
+projectCitySelect.value='3';
+manufacturerSelect.value='0';
+syncMap();

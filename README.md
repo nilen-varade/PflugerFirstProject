@@ -1,18 +1,18 @@
-# Mass Timber Carbon Studio Ultra++
+# Mass Timber Carbon Studio Ultra+++
 
-A friendly but professional conceptual calculator for mass timber embodied carbon and cost benchmarking.
+A professional, architect-friendly conceptual planner for mass-timber carbon and cost comparisons.
 
-## New in this version
+## Key upgrades
 
-- **20 timber manufacturers** with populated fabrication facility coordinates.
-- **50+ project cities** including a broad set of major Texas cities.
-- **18 building types** (10+ added from common construction sectors).
-- Optional parameters are now **blank by default** (not zero), with estimations applied only when needed.
-- Improved UI clarity for dropdown-driven workflows and quantity inputs.
-- Leaflet **fullscreen** map integration.
-- ArcGIS Open Data integration path + ArcGIS public schools query for location-based school comparison facts.
-- Seamless integration links for ORS, Mapillary, Cesium ion, and ArcGIS data search.
-- Zod validation, SunCalc context, Chart.js interactive report charts, and PDF export.
+- Added **Gymnasium** building type plus broad industry types (18 total).
+- Added **20 timber manufacturers** with fabrication facility coordinates.
+- Added **50+ U.S. project cities**, including extensive major Texas city coverage.
+- Optional inputs are blank by default; estimates are only applied when needed.
+- Auto-suggested market-style material costs ($/ft²) based on building type and city cost factor.
+- Added district-style compliance flags (stories/height + preferred code sets) as a practical guideline check layer.
+- Added ArcGIS school proximity facts within **5-mile and 10-mile** radii near project site.
+- Added richer report outputs: compliance/risk chart, expanded KPI/report cards, and design recommendations.
+- Added Leaflet fullscreen control and streamlined integration links for ORS, Mapillary, Cesium, ArcGIS, and NCES.
 
 ## Run
 
@@ -28,5 +28,5 @@ http://localhost:8000
 
 ## Notes
 
-- This is an early-stage planning tool and should be calibrated with project-specific EPD/LCA data for formal reporting.
-- ArcGIS school layer availability can vary by service uptime and data publication status.
+- This remains a conceptual planning tool and should be calibrated with project EPD/LCA workflows and local authority requirements.
+- “District guideline” checks are a practical screening layer and not a legal code review substitute.
