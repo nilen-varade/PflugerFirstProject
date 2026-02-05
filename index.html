@@ -3,19 +3,20 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Mass Timber Carbon Studio Ultra+</title>
+  <title>Mass Timber Carbon Studio Ultra++</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+  <link rel="stylesheet" href="https://unpkg.com/leaflet.fullscreen@3.0.0/Control.FullScreen.css" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <div class="app-shell">
     <aside class="sidebar">
-      <div class="brand-wrap"><div class="logo">MT</div><div><p class="eyebrow">Pfluger Architects • Pro Suite</p><h1>Carbon Studio Ultra+</h1></div></div>
-      <p class="muted">Imperial-unit, data-rich timber carbon + cost planner with map intelligence, solar context, optional defaults, and report export.</p>
-      <div class="pill-note"><strong>Optional fields default to 0</strong><small>Provide verified city/site data for refined model quality.</small></div>
+      <div class="brand-wrap"><div class="logo">MT</div><div><p class="eyebrow">Pfluger Architects • Pro Suite</p><h1>Carbon Studio Ultra++</h1></div></div>
+      <p class="muted">Friendly carbon + cost planning with smart defaults, map intelligence, and fast comparisons.</p>
+      <div class="pill-note"><strong>Optional fields are blank by default</strong><small>Add only what you know. The app estimates the rest.</small></div>
     </aside>
 
     <main class="main">
@@ -31,77 +32,78 @@
       <section class="workspace">
         <section class="panel">
           <div class="panel-head">
-            <h2>Comprehensive Input Model (Imperial Units)</h2>
-            <p>Hover over labels for definitions. Optional fields default to zero until project-specific data is known.</p>
+            <h2>Easy Input Wizard</h2>
+            <p>Tip: fields marked “optional” can stay blank. Hover labels for quick definitions.</p>
           </div>
+
           <form id="calculator-form">
             <details open>
-              <summary>Project & Site Discovery</summary>
+              <summary>1) Project & Site</summary>
               <div class="form-grid">
-                <label title="Project title for report output.">Project Name<input name="projectName" type="text" value="Regional Library and Recreation Center" /></label>
-                <label title="Find project by address or school name using OSM geocoding.">Site lookup (address/school name)<input name="siteQuery" type="text" placeholder="e.g. Austin High School, TX" /></label>
-                <label title="Geocode query using OpenStreetMap search.">Lookup action<button type="button" id="site-lookup-btn" class="ghost">Find Site</button></label>
-                <label title="Major US city baseline for cost and climate assumptions.">Project City<select id="project-city" name="projectCity"></select></label>
-                <label title="Timber supplier location for logistics calculations.">Timber Manufacturer<select id="manufacturer-select" name="manufacturerName"></select></label>
-                <label title="Primary occupancy type drives default quantities and costs.">Building Type<select name="buildingType"><option value="education">Education</option><option value="recreation">Recreational</option><option value="library">Library</option><option value="office">Office</option><option value="residential">Residential</option><option value="healthcare">Healthcare</option><option value="hospitality">Hospitality</option><option value="mixed-use">Mixed Use</option></select></label>
-                <label title="Used for area and load approximations.">Occupancy (people, optional)<input data-optional="true" name="occupancy" type="number" value="0" /></label>
+                <label title="Project name used in report headers.">Project Name<input name="projectName" type="text" value="Regional Library and Recreation Center" /></label>
+                <label title="Search by address or school name to place the site marker.">Site Search (address or school name)<input name="siteQuery" type="text" placeholder="Austin High School, TX" /></label>
+                <label title="Run site search using OpenStreetMap geocoder.">Search<button type="button" id="site-lookup-btn" class="ghost">Find Site</button></label>
+                <label title="City baseline for cost and climate assumptions.">Project City <span class="hint">(50+ cities)</span><select id="project-city" name="projectCity"></select></label>
+                <label title="Fabrication facility for timber logistics route.">Timber Manufacturer <span class="hint">(20 facilities)</span><select id="manufacturer-select" name="manufacturerName"></select></label>
+                <label title="Occupancy influences estimated floor area.">Occupancy (people) <span class="optional">optional</span><input data-optional="true" name="occupancy" type="number" placeholder="e.g. 850" /></label>
+                <label title="Building type drives quantity and cost assumptions.">Building Type <span class="hint">(18 options)</span><select name="buildingType"></select></label>
               </div>
             </details>
 
             <details open>
-              <summary>Geometry, Material, and Species</summary>
+              <summary>2) Geometry & Material Quantities</summary>
               <div class="form-grid">
-                <label title="Total floor area across all levels.">Gross Floor Area (ft², optional)<input data-optional="true" name="grossAreaFt2" type="number" value="0" /></label>
-                <label title="Typical single-floor area.">Floor Plate (ft², optional)<input data-optional="true" name="floorPlateFt2" type="number" value="0" /></label>
-                <label title="Number of above-grade floors.">Stories (optional)<input data-optional="true" name="stories" type="number" value="0" /></label>
-                <label title="Enter building height in feet and inches format like 54' 6\".">Height (ft-in, optional)<input data-optional="true" name="heightFtIn" type="text" value="0' 0&quot;" /></label>
-                <label title="CLT quantity in cubic feet.">CLT Volume (ft³, optional)<input data-optional="true" name="cltFt3" type="number" value="0" /></label>
-                <label title="Glulam quantity in cubic feet.">Glulam Volume (ft³, optional)<input data-optional="true" name="glulamFt3" type="number" value="0" /></label>
-                <label title="LVL quantity in cubic feet.">LVL Volume (ft³, optional)<input data-optional="true" name="lvlFt3" type="number" value="0" /></label>
-                <label title="NLT quantity in cubic feet.">NLT Volume (ft³, optional)<input data-optional="true" name="nltFt3" type="number" value="0" /></label>
-                <label title="DLT quantity in cubic feet.">DLT Volume (ft³, optional)<input data-optional="true" name="dltFt3" type="number" value="0" /></label>
-                <label title="Primary species affects density and sequestration factors.">Timber Species<select name="timberSpecies"><option value="douglas-fir">Douglas Fir-Larch</option><option value="spruce-pine-fir">Spruce-Pine-Fir</option><option value="southern-yellow-pine">Southern Yellow Pine</option><option value="hemlock-fir">Hemlock-Fir</option></select></label>
-                <label title="Percent of superstructure represented by CLT.">CLT Share (% optional)<input data-optional="true" name="cltUsePercent" type="number" value="0" /></label>
-                <label title="Combined trim loss and damage factor.">Waste Factor (% optional)<input data-optional="true" name="wasteFactor" type="number" value="0" /></label>
+                <label title="Total floor area across all levels.">Gross Floor Area (ft²) <span class="optional">optional</span><input data-optional="true" name="grossAreaFt2" type="number" placeholder="e.g. 95000" /></label>
+                <label title="Typical area per floor.">Floor Plate (ft²) <span class="optional">optional</span><input data-optional="true" name="floorPlateFt2" type="number" placeholder="e.g. 25000" /></label>
+                <label title="Number of floors.">Stories <span class="optional">optional</span><input data-optional="true" name="stories" type="number" placeholder="e.g. 4" /></label>
+                <label title="Format: 54' 6\".">Height (ft-in) <span class="optional">optional</span><input data-optional="true" name="heightFtIn" type="text" placeholder="54' 6&quot;" /></label>
+                <label title="Cross-laminated timber quantity.">CLT (ft³) <span class="optional">optional</span><input data-optional="true" name="cltFt3" type="number" /></label>
+                <label title="Glue-laminated timber quantity.">Glulam (ft³) <span class="optional">optional</span><input data-optional="true" name="glulamFt3" type="number" /></label>
+                <label title="Laminated veneer lumber quantity.">LVL (ft³) <span class="optional">optional</span><input data-optional="true" name="lvlFt3" type="number" /></label>
+                <label title="Nail-laminated timber quantity.">NLT (ft³) <span class="optional">optional</span><input data-optional="true" name="nltFt3" type="number" /></label>
+                <label title="Dowel-laminated timber quantity.">DLT (ft³) <span class="optional">optional</span><input data-optional="true" name="dltFt3" type="number" /></label>
+                <label title="Selected species impacts density and sequestration assumptions.">Timber Species<select name="timberSpecies"><option value="douglas-fir">Douglas Fir-Larch</option><option value="spruce-pine-fir">Spruce-Pine-Fir</option><option value="southern-yellow-pine">Southern Yellow Pine</option><option value="hemlock-fir">Hemlock-Fir</option></select></label>
+                <label title="Percent of superstructure as CLT.">CLT Share (%) <span class="optional">optional</span><input data-optional="true" name="cltUsePercent" type="number" /></label>
+                <label title="Material loss factor.">Waste Factor (%) <span class="optional">optional</span><input data-optional="true" name="wasteFactor" type="number" /></label>
               </div>
-              <div class="actions-row"><button type="button" id="estimate-btn" class="ghost">Auto-estimate from Type</button></div>
+              <div class="actions-row"><button type="button" id="estimate-btn" class="ghost">Auto-estimate Quantities</button></div>
             </details>
 
             <details>
-              <summary>Codes, Compliance, and Energy</summary>
+              <summary>3) Codes, Costs, and Integrations</summary>
               <div class="form-grid">
-                <label title="Select International Building Code edition.">IBC Version<select name="ibcVersion"><option>IBC 2012</option><option>IBC 2015</option><option>IBC 2018</option><option selected>IBC 2021</option><option>IBC 2024</option></select></label>
-                <label title="Select international fire code edition.">IFC Version<select name="ifcVersion"><option>IFC 2012</option><option>IFC 2015</option><option selected>IFC 2021</option><option>IFC 2024</option></select></label>
-                <label title="Select energy code basis.">Energy Code<select name="energyCode"><option>ASHRAE 90.1-2013</option><option>ASHRAE 90.1-2019</option><option selected>IECC 2021</option><option>IECC 2024</option><option>Title 24</option></select></label>
-                <label title="Select local code reference.">Local Code<select name="localCode"><option>None</option><option>Austin Amendments</option><option>NYC Construction Codes</option><option>LA Green Code</option><option>Chicago Energy Code</option></select></label>
-                <label title="Average grid emission intensity.">Grid Intensity (kgCO₂e/kWh optional)<input data-optional="true" name="gridIntensity" type="number" value="0" step="0.01" /></label>
-                <label title="Share of renewable power in fabrication process.">Renewable Share (% optional)<input data-optional="true" name="renewableShare" type="number" value="0" /></label>
-                <label title="Fire-resistance rating target.">Fire Rating (hours optional)<input data-optional="true" name="fireRating" type="number" value="0" step="0.5" /></label>
+                <label title="International Building Code edition.">IBC Version<select name="ibcVersion"><option>IBC 2009</option><option>IBC 2012</option><option>IBC 2015</option><option>IBC 2018</option><option selected>IBC 2021</option><option>IBC 2024</option></select></label>
+                <label title="International Fire Code edition.">IFC Version<select name="ifcVersion"><option>IFC 2009</option><option>IFC 2012</option><option>IFC 2015</option><option>IFC 2018</option><option selected>IFC 2021</option><option>IFC 2024</option></select></label>
+                <label title="Energy code basis.">Energy Code<select name="energyCode"><option>IECC 2015</option><option>IECC 2018</option><option selected>IECC 2021</option><option>IECC 2024</option><option>ASHRAE 90.1-2019</option><option>Title 24</option></select></label>
+                <label title="Local amendments and special rules.">Local Code<select name="localCode"><option>None</option><option>Austin Amendments</option><option>Houston Code</option><option>Dallas Code</option><option>San Antonio Code</option><option>NYC Construction Codes</option><option>LA Green Code</option></select></label>
+                <label title="Timber cost benchmark.">Timber Cost ($/ft²) <span class="optional">optional</span><input data-optional="true" name="timberCostPerFt2" type="number" /></label>
+                <label title="Steel baseline benchmark.">Steel Cost ($/ft²) <span class="optional">optional</span><input data-optional="true" name="steelCostPerFt2" type="number" /></label>
+                <label title="Concrete baseline benchmark.">Concrete Cost ($/ft²) <span class="optional">optional</span><input data-optional="true" name="concreteCostPerFt2" type="number" /></label>
+                <label title="Grid emissions factor.">Grid Intensity (kgCO₂e/kWh) <span class="optional">optional</span><input data-optional="true" name="gridIntensity" type="number" step="0.01" /></label>
+                <label title="Renewable fraction in fabrication energy.">Renewable Share (%) <span class="optional">optional</span><input data-optional="true" name="renewableShare" type="number" /></label>
+                <label title="Fire-resistance requirement.">Fire Rating (hours) <span class="optional">optional</span><input data-optional="true" name="fireRating" type="number" step="0.5" /></label>
+                <label title="Transport mode for route emissions.">Transport Mode<select name="transportMode"><option value="truck">Truck</option><option value="rail">Rail</option><option value="ship">Ship</option><option value="multimodal">Multimodal</option></select></label>
+                <label title="OpenRouteService key for route distance.">ORS API Key <span class="optional">optional</span><input data-optional="true" name="orsApiKey" type="text" placeholder="Paste key" /></label>
+                <label title="Mapillary token for street imagery.">Mapillary Token <span class="optional">optional</span><input data-optional="true" name="mapillaryToken" type="text" placeholder="Paste token" /></label>
+                <label title="Cesium ion access token.">Cesium Token <span class="optional">optional</span><input data-optional="true" name="cesiumToken" type="text" placeholder="Paste token" /></label>
+                <label title="3D tileset endpoint.">3D Tiles URL <span class="optional">optional</span><input data-optional="true" name="tilesetUrl" type="text" placeholder="https://.../tileset.json" /></label>
+                <label title="COLLADA model URL.">COLLADA URL <span class="optional">optional</span><input data-optional="true" name="colladaUrl" type="text" placeholder="https://.../model.dae" /></label>
               </div>
-            </details>
-
-            <details>
-              <summary>Cost, Logistics, APIs, and Advanced Integrations</summary>
-              <div class="form-grid">
-                <label title="Timber project hard-cost benchmark.">Timber Cost ($/ft² optional)<input data-optional="true" name="timberCostPerFt2" type="number" value="0" /></label>
-                <label title="Steel baseline hard-cost benchmark.">Steel Cost ($/ft² optional)<input data-optional="true" name="steelCostPerFt2" type="number" value="0" /></label>
-                <label title="Concrete baseline hard-cost benchmark.">Concrete Cost ($/ft² optional)<input data-optional="true" name="concreteCostPerFt2" type="number" value="0" /></label>
-                <label title="Primary freight mode.">Transport Mode<select name="transportMode"><option value="truck">Truck</option><option value="rail">Rail</option><option value="ship">Ship</option><option value="multimodal">Multimodal</option></select></label>
-                <label title="OpenRouteService API key for route-based logistics distance.">OpenRouteService API Key (optional)<input data-optional="true" name="orsApiKey" type="text" value="" placeholder="Paste key" /></label>
-                <label title="Mapillary API token for street-level imagery.">Mapillary Token (optional)<input data-optional="true" name="mapillaryToken" type="text" value="" placeholder="Paste token" /></label>
-                <label title="Cesium Ion token for 3D tiles.">Cesium Ion Token (optional)<input data-optional="true" name="cesiumToken" type="text" value="" placeholder="Paste token" /></label>
-                <label title="3D Tileset URL for Cesium visualization.">3D Tiles URL (optional)<input data-optional="true" name="tilesetUrl" type="text" value="" placeholder="https://.../tileset.json" /></label>
-                <label title="COLLADA (.dae) URL for model preview placeholder.">Collada URL (optional)<input data-optional="true" name="colladaUrl" type="text" value="" placeholder="https://.../model.dae" /></label>
+              <div class="integration-links">
+                <a href="https://openrouteservice.org/dev/#/signup" target="_blank" rel="noreferrer">Get ORS API key</a>
+                <a href="https://www.mapillary.com/dashboard/developers" target="_blank" rel="noreferrer">Get Mapillary token</a>
+                <a href="https://ion.cesium.com/signup" target="_blank" rel="noreferrer">Get Cesium ion token</a>
+                <a href="https://hub.arcgis.com/search?categories=open-data" target="_blank" rel="noreferrer">Browse ArcGIS Open Data</a>
               </div>
               <div class="actions-row">
-                <button type="button" id="ors-route-btn" class="ghost">Fetch ORS Route Distance</button>
-                <button type="button" id="mapillary-btn" class="ghost">Load Street Imagery</button>
-                <button type="button" id="cesium-btn" class="ghost">Initialize 3D Tiles View</button>
+                <button type="button" id="ors-route-btn" class="ghost">Fetch ORS Route</button>
+                <button type="button" id="mapillary-btn" class="ghost">Street View Link</button>
+                <button type="button" id="cesium-btn" class="ghost">3D Setup Summary</button>
               </div>
             </details>
 
             <div class="actions-row sticky-actions">
-              <button type="button" id="optional-toggle" class="ghost">Toggle Optional Emphasis</button>
+              <button type="button" id="optional-toggle" class="ghost">Toggle Optional Highlight</button>
               <button type="submit">Generate Interactive Report</button>
               <button type="button" id="export-pdf-btn" class="ghost">Export PDF</button>
             </div>
@@ -109,11 +111,11 @@
         </section>
 
         <section class="panel">
-          <div class="panel-head"><h2>Map + Interactive Report</h2><p>Includes SunCalc, route, fun facts, charts, and export tools.</p></div>
+          <div class="panel-head"><h2>Map + Friendly Report</h2><p>Fullscreen map, charts, school-data comparisons, and fun facts.</p></div>
           <div id="map"></div>
-          <div id="imagery-panel" class="integration-panel">Street-level imagery: provide Mapillary token and click load.</div>
-          <div id="cesium-panel" class="integration-panel">3D Tiles/COLLADA panel: provide Cesium token + tiles URL.</div>
-          <div id="results-summary" class="results-card">Run the model to produce interactive charts, comparisons, and fun facts.</div>
+          <div id="imagery-panel" class="integration-panel">Street-level imagery panel.</div>
+          <div id="cesium-panel" class="integration-panel">3D tiles & COLLADA integration panel.</div>
+          <div id="results-summary" class="results-card">Run the model to generate report output.</div>
           <div class="chart-wrap"><h3>Embodied Carbon Comparison</h3><canvas id="carbon-canvas"></canvas></div>
           <div class="chart-wrap"><h3>Cost Comparison</h3><canvas id="cost-canvas"></canvas></div>
           <div class="chart-wrap"><h3>Material Mix Radar</h3><canvas id="mix-canvas"></canvas></div>
@@ -125,6 +127,7 @@
   </div>
 
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+  <script src="https://unpkg.com/leaflet.fullscreen@3.0.0/Control.FullScreen.js"></script>
   <script src="https://unpkg.com/suncalc@1.9.0/suncalc.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/zod@3.23.8/lib/index.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>

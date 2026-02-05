@@ -1,21 +1,18 @@
-# Mass Timber Carbon Studio Ultra+
+# Mass Timber Carbon Studio Ultra++
 
-Professional conceptual calculator for mass timber embodied carbon and cost comparisons against steel and concrete.
+A friendly but professional conceptual calculator for mass timber embodied carbon and cost benchmarking.
 
-## Major capabilities
+## New in this version
 
-- Imperial-unit workflow (ft/in and ft²/ft³).
-- Optional parameters default to **0** until project-specific data is entered.
-- Hover tooltips on parameter labels for plain-language guidance.
-- Expanded code selectors: older/new IBC, IFC, energy code, and local code options.
-- Site lookup by address/school name (OSM geocoding).
-- OpenRouteService routing distance option (API key supported).
-- SunCalc integration for solar noon/position context.
-- Mapillary street-level imagery launch integration.
-- Cesium/3D Tiles + Collada configuration panel hooks.
-- Zod validation for key input constraints.
-- Interactive charts (bar/doughnut/radar) + fun facts.
-- PDF report export using jsPDF + html2canvas.
+- **20 timber manufacturers** with populated fabrication facility coordinates.
+- **50+ project cities** including a broad set of major Texas cities.
+- **18 building types** (10+ added from common construction sectors).
+- Optional parameters are now **blank by default** (not zero), with estimations applied only when needed.
+- Improved UI clarity for dropdown-driven workflows and quantity inputs.
+- Leaflet **fullscreen** map integration.
+- ArcGIS Open Data integration path + ArcGIS public schools query for location-based school comparison facts.
+- Seamless integration links for ORS, Mapillary, Cesium ion, and ArcGIS data search.
+- Zod validation, SunCalc context, Chart.js interactive report charts, and PDF export.
 
 ## Run
 
@@ -31,5 +28,5 @@ http://localhost:8000
 
 ## Notes
 
-- This remains a conceptual planner and should be calibrated using project-specific EPDs and formal LCA workflows.
-- For ORS, Mapillary, and Cesium production usage, provide valid API keys/tokens.
+- This is an early-stage planning tool and should be calibrated with project-specific EPD/LCA data for formal reporting.
+- ArcGIS school layer availability can vary by service uptime and data publication status.
