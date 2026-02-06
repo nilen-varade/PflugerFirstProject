@@ -1,4 +1,4 @@
-# Mass Timber Carbon Studio Ultra+++
+# Pfluger Mass Timber Calculator
 
 A professional, architect-friendly conceptual planner for mass-timber carbon and cost comparisons.
 
