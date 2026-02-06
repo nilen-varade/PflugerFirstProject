@@ -53,6 +53,14 @@ const route = L.polyline([mfgMarker.getLatLng(),siteMarker.getLatLng()],{color:'
 
 let carbonChart,costChart,mixChart,riskChart,schoolFacts={five:0,ten:0,avgEnroll:0};
 
+
+function withTimeout(promise, ms = 4500) {
+  return Promise.race([
+    promise,
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timed out')), ms)),
+  ]);
+}
+
 const byId = (id)=>document.getElementById(id);
 const btn = {site:byId('site-lookup-btn'), est:byId('estimate-btn'), opt:byId('optional-toggle'), ors:byId('ors-route-btn'), mapillary:byId('mapillary-btn'), cesium:byId('cesium-btn'), pdf:byId('export-pdf-btn')};
 
@@ -131,8 +139,8 @@ async function fetchSchoolsByRadius(lat,lng,mi) {
 async function updateSchoolFacts() {
   try {
     const s = siteMarker.getLatLng();
-    const five = await fetchSchoolsByRadius(s.lat,s.lng,5);
-    const ten = await fetchSchoolsByRadius(s.lat,s.lng,10);
+    const five = await withTimeout(fetchSchoolsByRadius(s.lat,s.lng,5));
+    const ten = await withTimeout(fetchSchoolsByRadius(s.lat,s.lng,10));
     schoolFacts = {five:five.count, ten:ten.count, avgEnroll: ten.avg};
   } catch {
     schoolFacts = {five:0, ten:0, avgEnroll:0};
@@ -181,6 +189,7 @@ function fmtKg(v){return `${Math.round(v).toLocaleString()} kg CO₂e`;}
 function fmtMoney(v){return `$${Math.round(v).toLocaleString()}`;}
 
 function drawCharts(res, compliance) {
+  if (!window.Chart) return;
   const make = (id)=>document.getElementById(id);
   carbonChart?.destroy(); costChart?.destroy(); mixChart?.destroy(); riskChart?.destroy();
 
@@ -233,6 +242,7 @@ function renderFunAndSuggestions(fd,res,compliance) {
 async function submit(event){
   event.preventDefault();
   const fd = new FormData(form);
+  try {
   const valid = schema.safeParse({projectName:fd.get('projectName'),grossAreaFt2:fd.get('grossAreaFt2')||0,stories:fd.get('stories')||0,cltUsePercent:fd.get('cltUsePercent')||0});
   if(!valid.success){resultsSummary.innerHTML=`<strong>Validation error:</strong> ${valid.error.issues[0].message}`;return;}
 
@@ -254,6 +264,9 @@ async function submit(event){
 
   resultsSummary.innerHTML = `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`;
   assumptions.innerHTML = `Route ${d.toFixed(1)} mi • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`;
+  } catch (err) {
+    resultsSummary.innerHTML = `<p><strong>Report generation error:</strong> ${err.message}</p>`;
+  }
 }
 
 btn.site.addEventListener('click', async ()=>{
