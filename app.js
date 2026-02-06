@@ -1,4 +1,5 @@
-const { z } = window.Zod;
+const zodLib = window.Zod || window.zod || null;
+const z = zodLib?.z || null;
 
 const form = document.getElementById('calculator-form');
 const distanceLabel = document.getElementById('distance-mi');
@@ -43,7 +44,21 @@ const districtRules = {
 const speciesFactors = {'douglas-fir':{density:0.53,seq:-760,f:1},'spruce-pine-fir':{density:0.46,seq:-690,f:0.96},'southern-yellow-pine':{density:0.57,seq:-780,f:1.04},'hemlock-fir':{density:0.49,seq:-710,f:0.99}};
 const transportFactors = {truck:0.11,rail:0.03,ship:0.015,multimodal:0.055};
 
-const schema = z.object({projectName:z.string().min(1),grossAreaFt2:z.coerce.number().min(0),stories:z.coerce.number().min(0),cltUsePercent:z.coerce.number().min(0).max(100)});
+const schema = z ? z.object({projectName:z.string().min(1),grossAreaFt2:z.coerce.number().min(0),stories:z.coerce.number().min(0),cltUsePercent:z.coerce.number().min(0).max(100)}) : null;
+
+function validateInputs(fd) {
+  if (schema) {
+    return schema.safeParse({
+      projectName: fd.get('projectName'),
+      grossAreaFt2: fd.get('grossAreaFt2') || 0,
+      stories: fd.get('stories') || 0,
+      cltUsePercent: fd.get('cltUsePercent') || 0,
+    });
+  }
+  const name = String(fd.get('projectName') || '').trim();
+  if (!name) return { success: false, error: { issues: [{ message: 'Project name is required.' }] } };
+  return { success: true };
+}
 
 const map = L.map('map', { fullscreenControl: true }).setView([31,-99],5);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:18,attribution:'&copy; OpenStreetMap'}).addTo(map);
@@ -98,8 +113,12 @@ function updateDistance() {
   route.setLatLngs([mfgMarker.getLatLng(), siteMarker.getLatLng()]);
   const d = miles(mfgMarker.getLatLng(), siteMarker.getLatLng());
   distanceLabel.textContent = `${d.toFixed(0)} mi`;
-  const t = SunCalc.getTimes(new Date(), siteMarker.getLatLng().lat, siteMarker.getLatLng().lng);
-  solarPeakEl.textContent = t.solarNoon ? t.solarNoon.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'N/A';
+  if (window.SunCalc) {
+    const t = SunCalc.getTimes(new Date(), siteMarker.getLatLng().lat, siteMarker.getLatLng().lng);
+    solarPeakEl.textContent = t.solarNoon ? t.solarNoon.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'N/A';
+  } else {
+    solarPeakEl.textContent = 'N/A';
+  }
   return d;
 }
 
@@ -243,7 +262,7 @@ async function submit(event){
   event.preventDefault();
   const fd = new FormData(form);
   try {
-  const valid = schema.safeParse({projectName:fd.get('projectName'),grossAreaFt2:fd.get('grossAreaFt2')||0,stories:fd.get('stories')||0,cltUsePercent:fd.get('cltUsePercent')||0});
+  const valid = validateInputs(fd);
   if(!valid.success){resultsSummary.innerHTML=`<strong>Validation error:</strong> ${valid.error.issues[0].message}`;return;}
 
   const d = updateDistance();
@@ -325,3 +344,4 @@ populate();
 projectCitySelect.value='3';
 manufacturerSelect.value='0';
 syncMap();
+if (!z) { resultsSummary.innerHTML = '<p><strong>Note:</strong> Zod validation library did not load. Running with basic validation fallback.</p>'; }
