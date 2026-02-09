@@ -13,7 +13,9 @@ A professional, architect-friendly conceptual planner for mass-timber carbon and
 - Added ArcGIS school proximity facts within **5-mile and 10-mile** radii near project site.
 - Added richer report outputs: compliance/risk chart, expanded KPI/report cards, and design recommendations.
 - Added building-system modeling (all-timber and hybrid assemblies such as steel columns + CLT deck + timber beams) to better reflect mixed-structure projects.
+- Default code selections are pre-populated to 2024-ready options (IBC 2024, IFC 2024, IECC 2024), and Timberlab is pre-selected as default manufacturer.
 - Improved PDF export quality with high-resolution, multi-page rendering and automatic filename based on project name.
+- Improved Leaflet capture alignment during PDF export so route line/markers stay aligned with the map.
 - Hardened null-safe UI rendering to avoid `Cannot set properties of null` errors and ensure report generation works with limited project input data.
 - Hardened report generation with timeout/error handling so clicking **Generate Designer Report** always returns user feedback even if external APIs are slow/unavailable.
 - Added Leaflet fullscreen control and streamlined integration links for ORS, Mapillary, Cesium, ArcGIS, and NCES.

@@ -102,6 +102,59 @@ function withTimeout(promise, ms = 4500) {
 
 const byId = (id)=>document.getElementById(id);
 
+
+function parseTranslate(transformValue) {
+  if (!transformValue || transformValue === 'none') return { x: 0, y: 0 };
+  const matrix3d = transformValue.match(/matrix3d\(([^)]+)\)/);
+  if (matrix3d) {
+    const values = matrix3d[1].split(',').map((v) => Number(v.trim()));
+    return { x: values[12] || 0, y: values[13] || 0 };
+  }
+  const matrix2d = transformValue.match(/matrix\(([^)]+)\)/);
+  if (matrix2d) {
+    const values = matrix2d[1].split(',').map((v) => Number(v.trim()));
+    return { x: values[4] || 0, y: values[5] || 0 };
+  }
+  const translate3d = transformValue.match(/translate3d\(([-\d.]+)px,\s*([-\d.]+)px/i);
+  if (translate3d) return { x: Number(translate3d[1]) || 0, y: Number(translate3d[2]) || 0 };
+  const translate = transformValue.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px/i);
+  if (translate) return { x: Number(translate[1]) || 0, y: Number(translate[2]) || 0 };
+  return { x: 0, y: 0 };
+}
+
+function normalizeLeafletForCapture() {
+  const mapEl = document.getElementById('map');
+  if (!mapEl) return () => {};
+
+  const targets = mapEl.querySelectorAll('.leaflet-pane, .leaflet-zoom-animated, .leaflet-zoom-hide');
+  const snapshots = [];
+
+  targets.forEach((el) => {
+    const priorTransform = el.style.transform || '';
+    const priorLeft = el.style.left || '';
+    const priorTop = el.style.top || '';
+    const computedTransform = window.getComputedStyle(el).transform;
+    const { x, y } = parseTranslate(computedTransform);
+
+    if (x || y || computedTransform !== 'none') {
+      const baseLeft = parseFloat(window.getComputedStyle(el).left) || 0;
+      const baseTop = parseFloat(window.getComputedStyle(el).top) || 0;
+      el.style.transform = 'none';
+      el.style.left = `${baseLeft + x}px`;
+      el.style.top = `${baseTop + y}px`;
+
+      snapshots.push(() => {
+        el.style.transform = priorTransform;
+        el.style.left = priorLeft;
+        el.style.top = priorTop;
+      });
+    }
+  });
+
+  return () => snapshots.reverse().forEach((restore) => restore());
+}
+
+
 hasElement(form, 'calculator-form');
 hasElement(resultsSummary, 'results-summary');
 hasElement(reportGrid, 'report-grid');
@@ -373,12 +426,17 @@ btn.cesium.addEventListener('click', ()=>{
 });
 
 btn.pdf.addEventListener('click', async ()=>{
+  let restoreLeaflet = () => {};
   try {
     const panel = document.querySelector('.panel:last-child');
     if (!panel || !window.html2canvas || !window.jspdf?.jsPDF) {
       safeSetHTML(resultsSummary, '<p><strong>PDF export unavailable:</strong> required export libraries or report panel are missing.</p>');
       return;
     }
+
+    map.invalidateSize(true);
+    await new Promise((resolve) => setTimeout(resolve, 180));
+    restoreLeaflet = normalizeLeafletForCapture();
 
     const scale = Math.max(2, Math.min(4, window.devicePixelRatio || 2));
     const canvas = await html2canvas(panel, {
@@ -426,6 +484,8 @@ btn.pdf.addEventListener('click', async ()=>{
     safeSetHTML(resultsSummary, `<p><strong>PDF exported:</strong> ${fileName}</p>`);
   } catch (err) {
     safeSetHTML(resultsSummary, `<p><strong>PDF export failed:</strong> ${err.message}</p>`);
+  } finally {
+    restoreLeaflet();
   }
 });
 
@@ -438,6 +498,6 @@ siteMarker.on('dragend', updateDistance);
 
 populate();
 projectCitySelect.value='3';
-manufacturerSelect.value='0';
+manufacturerSelect.value = String(Math.max(0, mfgData.findIndex((m) => m.name.toLowerCase().includes('timberlab'))));
 syncMap();
 if (!z) { safeSetHTML(resultsSummary, '<p><strong>Note:</strong> Zod validation library did not load. Running with basic validation fallback.</p>'); }
