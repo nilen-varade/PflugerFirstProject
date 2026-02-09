@@ -20,6 +20,23 @@ const projectCitySelect = document.getElementById('project-city');
 const manufacturerSelect = document.getElementById('manufacturer-select');
 const buildingTypeSelect = form.elements.buildingType;
 
+
+function safeSetText(el, value) {
+  if (el) el.textContent = value;
+}
+
+function safeSetHTML(el, value) {
+  if (el) el.innerHTML = value;
+}
+
+function hasElement(el, name) {
+  if (!el) {
+    console.warn(`Missing expected element: ${name}`);
+    return false;
+  }
+  return true;
+}
+
 const cityData = [
   ['Houston, TX',29.7604,-95.3698,0.98],['San Antonio, TX',29.4241,-98.4936,0.96],['Dallas, TX',32.7767,-96.7970,1.00],['Austin, TX',30.2672,-97.7431,1.09],['Fort Worth, TX',32.7555,-97.3308,0.98],['El Paso, TX',31.7619,-106.4850,0.92],['Arlington, TX',32.7357,-97.1081,0.98],['Corpus Christi, TX',27.8006,-97.3964,0.94],['Plano, TX',33.0198,-96.6989,1.02],['Lubbock, TX',33.5779,-101.8552,0.90],['Laredo, TX',27.5306,-99.4803,0.91],['Irving, TX',32.8140,-96.9489,0.99],['Garland, TX',32.9126,-96.6389,0.98],['Amarillo, TX',35.2220,-101.8313,0.90],['Grand Prairie, TX',32.7459,-96.9978,0.98],['McKinney, TX',33.1972,-96.6398,1.00],['Frisco, TX',33.1507,-96.8236,1.02],['Brownsville, TX',25.9017,-97.4975,0.90],['Pasadena, TX',29.6911,-95.2091,0.95],['Killeen, TX',31.1171,-97.7278,0.93],['Waco, TX',31.5493,-97.1467,0.94],['McAllen, TX',26.2034,-98.2300,0.91],['Denton, TX',33.2148,-97.1331,0.97],['Midland, TX',31.9973,-102.0779,0.93],['Abilene, TX',32.4487,-99.7331,0.90],
   ['New York, NY',40.7128,-74.0060,1.23],['Los Angeles, CA',34.0522,-118.2437,1.20],['Chicago, IL',41.8781,-87.6298,1.10],['Phoenix, AZ',33.4484,-112.0740,1.01],['Philadelphia, PA',39.9526,-75.1652,1.07],['San Diego, CA',32.7157,-117.1611,1.16],['San Jose, CA',37.3382,-121.8863,1.19],['Jacksonville, FL',30.3322,-81.6557,0.98],['Columbus, OH',39.9612,-82.9988,0.96],['Charlotte, NC',35.2271,-80.8431,0.98],['Indianapolis, IN',39.7684,-86.1581,0.95],['Seattle, WA',47.6062,-122.3321,1.17],['Denver, CO',39.7392,-104.9903,1.08],['Boston, MA',42.3601,-71.0589,1.19],['Nashville, TN',36.1627,-86.7816,0.99],['Baltimore, MD',39.2904,-76.6122,1.05],['Milwaukee, WI',43.0389,-87.9065,0.97],['Portland, OR',45.5152,-122.6784,1.10],['Las Vegas, NV',36.1699,-115.1398,1.03],['Detroit, MI',42.3314,-83.0458,0.95],['Memphis, TN',35.1495,-90.0490,0.92],['Louisville, KY',38.2527,-85.7585,0.94],['Oklahoma City, OK',35.4676,-97.5164,0.92],['Atlanta, GA',33.7490,-84.3880,1.02],['Miami, FL',25.7617,-80.1918,1.08],['Raleigh, NC',35.7796,-78.6382,0.99],['Kansas City, MO',39.0997,-94.5786,0.95],['Omaha, NE',41.2565,-95.9345,0.92],['Albuquerque, NM',35.0844,-106.6504,0.91],['Sacramento, CA',38.5816,-121.4944,1.12]
@@ -77,6 +94,12 @@ function withTimeout(promise, ms = 4500) {
 }
 
 const byId = (id)=>document.getElementById(id);
+
+hasElement(form, 'calculator-form');
+hasElement(resultsSummary, 'results-summary');
+hasElement(reportGrid, 'report-grid');
+hasElement(complianceScoreEl, 'compliance-score');
+
 const btn = {site:byId('site-lookup-btn'), est:byId('estimate-btn'), opt:byId('optional-toggle'), ors:byId('ors-route-btn'), mapillary:byId('mapillary-btn'), cesium:byId('cesium-btn'), pdf:byId('export-pdf-btn')};
 
 const num = (fd,k,d=0)=>{const r=fd.get(k); const n=Number(r); return (r===''||r==null||!Number.isFinite(n))?d:n;};
@@ -112,12 +135,12 @@ function syncMap() {
 function updateDistance() {
   route.setLatLngs([mfgMarker.getLatLng(), siteMarker.getLatLng()]);
   const d = miles(mfgMarker.getLatLng(), siteMarker.getLatLng());
-  distanceLabel.textContent = `${d.toFixed(0)} mi`;
+  safeSetText(distanceLabel, `${d.toFixed(0)} mi`);
   if (window.SunCalc) {
     const t = SunCalc.getTimes(new Date(), siteMarker.getLatLng().lat, siteMarker.getLatLng().lng);
-    solarPeakEl.textContent = t.solarNoon ? t.solarNoon.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'N/A';
+    safeSetText(solarPeakEl, t.solarNoon ? t.solarNoon.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) : 'N/A');
   } else {
-    solarPeakEl.textContent = 'N/A';
+    safeSetText(solarPeakEl, 'N/A');
   }
   return d;
 }
@@ -236,7 +259,7 @@ function renderReportGrid(res, compliance) {
     ['District Max Stories', compliance.rule.maxStories],
     ['District Max Height', `${compliance.rule.maxHeightFt} ft`],
   ];
-  reportGrid.innerHTML = cards.map(([k,v])=>`<article class="report-card"><p>${k}</p><h4>${v}</h4></article>`).join('');
+  safeSetHTML(reportGrid, cards.map(([k,v])=>`<article class="report-card"><p>${k}</p><h4>${v}</h4></article>`).join(''));
 }
 
 function renderFunAndSuggestions(fd,res,compliance) {
@@ -245,7 +268,7 @@ function renderFunAndSuggestions(fd,res,compliance) {
   const saved = Math.max(0, res.carbon.steel - res.carbon.timber);
   const cars = saved / 0.404;
   const treeYears = saved / 21;
-  funFacts.innerHTML = `<strong>Project Fun Facts (${pname})</strong><br>• For this ${btype.replace(/-/g,' ')} scenario, carbon savings vs steel are like avoiding <strong>${Math.round(cars).toLocaleString()}</strong> car miles.<br>• Equivalent to roughly <strong>${Math.round(treeYears).toLocaleString()}</strong> tree-year sequestration credits.<br>• Within 5 miles: <strong>${schoolFacts.five}</strong> public schools; within 10 miles: <strong>${schoolFacts.ten}</strong>.`;
+  safeSetHTML(funFacts, `<strong>Project Fun Facts (${pname})</strong><br>• For this ${btype.replace(/-/g,' ')} scenario, carbon savings vs steel are like avoiding <strong>${Math.round(cars).toLocaleString()}</strong> car miles.<br>• Equivalent to roughly <strong>${Math.round(treeYears).toLocaleString()}</strong> tree-year sequestration credits.<br>• Within 5 miles: <strong>${schoolFacts.five}</strong> public schools; within 10 miles: <strong>${schoolFacts.ten}</strong>.`);
 
   const recs = [];
   if (res.cltShare < 0.55) recs.push('Increase CLT share toward ~55–70% to improve timber carbon performance.');
@@ -255,7 +278,7 @@ function renderFunAndSuggestions(fd,res,compliance) {
   if (num(fd,'wasteFactor',0) > 8) recs.push('Improve prefabrication planning to reduce waste below 8%.');
   if (!recs.length) recs.push('Current assumptions are balanced. Next step: verify with supplier EPD and district manual alignment.');
 
-  recommendationsEl.innerHTML = `<strong>Design Suggestions</strong><ul>${recs.map((r)=>`<li>${r}</li>`).join('')}</ul>`;
+  safeSetHTML(recommendationsEl, `<strong>Design Suggestions</strong><ul>${recs.map((r)=>`<li>${r}</li>`).join('')}</ul>`);
 }
 
 async function submit(event){
@@ -263,35 +286,35 @@ async function submit(event){
   const fd = new FormData(form);
   try {
   const valid = validateInputs(fd);
-  if(!valid.success){resultsSummary.innerHTML=`<strong>Validation error:</strong> ${valid.error.issues[0].message}`;return;}
+  if(!valid.success){safeSetHTML(resultsSummary, `<strong>Validation error:</strong> ${valid.error.issues[0].message}`);return;}
 
   const d = updateDistance();
   await updateSchoolFacts();
   const res = calculate(fd,d);
   const comp = complianceCheck(fd,res.est);
 
-  timberTotal.textContent = fmtKg(res.carbon.timber);
+  safeSetText(timberTotal, fmtKg(res.carbon.timber));
   const dS = res.carbon.steel - res.carbon.timber, dC = res.carbon.concrete - res.carbon.timber;
-  steelSavings.textContent = `${Math.round(Math.abs(dS)).toLocaleString()} kg ${dS>=0?'lower':'higher'}`;
-  concreteSavings.textContent = `${Math.round(Math.abs(dC)).toLocaleString()} kg ${dC>=0?'lower':'higher'}`;
-  timberCostEl.textContent = fmtMoney(res.cost.timber);
-  complianceScoreEl.textContent = `${comp.score}/100`;
+  safeSetText(steelSavings, `${Math.round(Math.abs(dS)).toLocaleString()} kg ${dS>=0?'lower':'higher'}`);
+  safeSetText(concreteSavings, `${Math.round(Math.abs(dC)).toLocaleString()} kg ${dC>=0?'lower':'higher'}`);
+  safeSetText(timberCostEl, fmtMoney(res.cost.timber));
+  safeSetText(complianceScoreEl, `${comp.score}/100`);
 
   drawCharts(res, comp);
   renderReportGrid(res, comp);
   renderFunAndSuggestions(fd,res,comp);
 
-  resultsSummary.innerHTML = `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`;
-  assumptions.innerHTML = `Route ${d.toFixed(1)} mi • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`;
+  safeSetHTML(resultsSummary, `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`);
+  safeSetHTML(assumptions, `Route ${d.toFixed(1)} mi • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`);
   } catch (err) {
-    resultsSummary.innerHTML = `<p><strong>Report generation error:</strong> ${err.message}</p>`;
+    safeSetHTML(resultsSummary, `<p><strong>Report generation error:</strong> ${err.message}</p>`);
   }
 }
 
 btn.site.addEventListener('click', async ()=>{
   const q=form.elements.siteQuery.value.trim(); if(!q) return;
-  try{const f=await geocodeSite(q); siteMarker.setLatLng([f.lat,f.lng]); map.panTo([f.lat,f.lng]); resultsSummary.innerHTML=`<p><strong>Site found:</strong> ${f.display}</p>`; updateDistance();}
-  catch(e){resultsSummary.innerHTML=`<p><strong>Lookup failed:</strong> ${e.message}</p>`;}
+  try{const f=await geocodeSite(q); siteMarker.setLatLng([f.lat,f.lng]); map.panTo([f.lat,f.lng]); safeSetHTML(resultsSummary, `<p><strong>Site found:</strong> ${f.display}</p>`); updateDistance();}
+  catch(e){safeSetHTML(resultsSummary, `<p><strong>Lookup failed:</strong> ${e.message}</p>`);}
 });
 
 btn.est.addEventListener('click', ()=>{
@@ -312,20 +335,20 @@ let optionalHidden=false;
 btn.opt.addEventListener('click', ()=>{optionalHidden=!optionalHidden; form.classList.toggle('optional-hidden', optionalHidden);});
 
 btn.ors.addEventListener('click', async ()=>{
-  const key=form.elements.orsApiKey.value.trim(); if(!key){resultsSummary.innerHTML='<p><strong>ORS:</strong> add an API key.</p>'; return;}
-  try{const m=await orsMiles(key); distanceLabel.textContent=`${m.toFixed(0)} mi`; resultsSummary.innerHTML=`<p><strong>ORS route distance:</strong> ${m.toFixed(1)} mi.</p>`;}
-  catch(e){resultsSummary.innerHTML=`<p><strong>ORS failed:</strong> ${e.message}</p>`; updateDistance();}
+  const key=form.elements.orsApiKey.value.trim(); if(!key){safeSetHTML(resultsSummary, '<p><strong>ORS:</strong> add an API key.</p>'); return;}
+  try{const m=await orsMiles(key); safeSetText(distanceLabel, `${m.toFixed(0)} mi`); safeSetHTML(resultsSummary, `<p><strong>ORS route distance:</strong> ${m.toFixed(1)} mi.</p>`);}
+  catch(e){safeSetHTML(resultsSummary, `<p><strong>ORS failed:</strong> ${e.message}</p>`); updateDistance();}
 });
 
 btn.mapillary.addEventListener('click', ()=>{
   const t=form.elements.mapillaryToken.value.trim();
   const s=siteMarker.getLatLng();
-  imageryPanel.innerHTML=t?`Open street imagery: <a href="https://www.mapillary.com/app/?lat=${s.lat}&lng=${s.lng}&z=16" target="_blank" rel="noreferrer">Mapillary Viewer</a>`:'Add token, then click again for street imagery link.';
+  safeSetHTML(imageryPanel, t?`Open street imagery: <a href="https://www.mapillary.com/app/?lat=${s.lat}&lng=${s.lng}&z=16" target="_blank" rel="noreferrer">Mapillary Viewer</a>`:'Add token, then click again for street imagery link.');
 });
 
 btn.cesium.addEventListener('click', ()=>{
   const t=form.elements.cesiumToken.value.trim(), tiles=form.elements.tilesetUrl.value.trim(), col=form.elements.colladaUrl.value.trim();
-  cesiumPanel.innerHTML=`Cesium setup: ${t?'token set':'token missing'} • tiles: ${tiles||'none'} • collada: ${col||'none'}`;
+  safeSetHTML(cesiumPanel, `Cesium setup: ${t?'token set':'token missing'} • tiles: ${tiles||'none'} • collada: ${col||'none'}`);
 });
 
 btn.pdf.addEventListener('click', async ()=>{
@@ -344,4 +367,4 @@ populate();
 projectCitySelect.value='3';
 manufacturerSelect.value='0';
 syncMap();
-if (!z) { resultsSummary.innerHTML = '<p><strong>Note:</strong> Zod validation library did not load. Running with basic validation fallback.</p>'; }
+if (!z) { safeSetHTML(resultsSummary, '<p><strong>Note:</strong> Zod validation library did not load. Running with basic validation fallback.</p>'); }
