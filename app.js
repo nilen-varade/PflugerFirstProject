@@ -60,6 +60,13 @@ const districtRules = {
 
 const speciesFactors = {'douglas-fir':{density:0.53,seq:-760,f:1},'spruce-pine-fir':{density:0.46,seq:-690,f:0.96},'southern-yellow-pine':{density:0.57,seq:-780,f:1.04},'hemlock-fir':{density:0.49,seq:-710,f:0.99}};
 const transportFactors = {truck:0.11,rail:0.03,ship:0.015,multimodal:0.055};
+const buildingSystemFactors = {
+  'all-timber': { carbonMultiplier: 1.0, timberCostMultiplier: 1.0, steelBaselineMultiplier: 1.0, concreteBaselineMultiplier: 1.0 },
+  'hybrid-steel-columns': { carbonMultiplier: 1.12, timberCostMultiplier: 1.05, steelBaselineMultiplier: 0.96, concreteBaselineMultiplier: 1.0 },
+  'hybrid-steel-frame': { carbonMultiplier: 1.18, timberCostMultiplier: 1.04, steelBaselineMultiplier: 0.94, concreteBaselineMultiplier: 1.0 },
+  'hybrid-concrete-core': { carbonMultiplier: 1.10, timberCostMultiplier: 1.03, steelBaselineMultiplier: 1.0, concreteBaselineMultiplier: 0.97 },
+  'hybrid-concrete-podium': { carbonMultiplier: 1.08, timberCostMultiplier: 1.02, steelBaselineMultiplier: 1.0, concreteBaselineMultiplier: 0.98 },
+};
 
 const schema = z ? z.object({projectName:z.string().min(1),grossAreaFt2:z.coerce.number().min(0),stories:z.coerce.number().min(0),cltUsePercent:z.coerce.number().min(0).max(100)}) : null;
 
@@ -219,6 +226,7 @@ async function orsMiles(key) {
 function calculate(fd, routeMiles) {
   const est = estimate(fd);
   const species = speciesFactors[fd.get('timberSpecies')] || speciesFactors['douglas-fir'];
+  const system = buildingSystemFactors[fd.get('buildingSystem')] || buildingSystemFactors['all-timber'];
   const waste = num(fd,'wasteFactor',0)/100;
   const cltShare = num(fd,'cltUsePercent',0)/100;
   const totalFt3=(est.clt+est.glu+est.lvl+est.nlt+est.dlt)*(1+waste);
@@ -228,15 +236,16 @@ function calculate(fd, routeMiles) {
   const complexity=1+est.height/400+fire*0.02;
   const transport=transportFactors[fd.get('transportMode')]||0.11;
 
-  const carbonTimber = totalM3*115*species.f + mass*routeMiles*transport + est.gross*0.85*grid*(1-renew) + totalM3*species.seq;
-  const carbonSteel = est.gross*22*complexity + routeMiles*180;
-  const carbonConcrete = est.gross*14*complexity + routeMiles*120;
+  const carbonTimberBase = totalM3*115*species.f + mass*routeMiles*transport + est.gross*0.85*grid*(1-renew) + totalM3*species.seq;
+  const carbonTimber = carbonTimberBase * system.carbonMultiplier;
+  const carbonSteel = (est.gross*22*complexity + routeMiles*180) * system.steelBaselineMultiplier;
+  const carbonConcrete = (est.gross*14*complexity + routeMiles*120) * system.concreteBaselineMultiplier;
 
   const city = cityData[Number(projectCitySelect.value)] || cityData[0];
   const costT = num(fd,'timberCostPerFt2',365), costS=num(fd,'steelCostPerFt2',340), costC=num(fd,'concreteCostPerFt2',330);
-  const timberCost = est.gross*costT*city.cost, steelCost=est.gross*costS*city.cost, concreteCost=est.gross*costC*city.cost;
+  const timberCost = est.gross*costT*city.cost*system.timberCostMultiplier, steelCost=est.gross*costS*city.cost, concreteCost=est.gross*costC*city.cost;
 
-  return {est, complexity, cltShare, carbon:{timber:carbonTimber,steel:carbonSteel,concrete:carbonConcrete}, cost:{timber:timberCost,steel:steelCost,concrete:concreteCost}, transportImpact: mass*routeMiles*transport};
+  return {est, complexity, cltShare, buildingSystem:fd.get('buildingSystem') || 'all-timber', carbon:{timber:carbonTimber,steel:carbonSteel,concrete:carbonConcrete}, cost:{timber:timberCost,steel:steelCost,concrete:concreteCost}, transportImpact: mass*routeMiles*transport};
 }
 
 function fmtKg(v){return `${Math.round(v).toLocaleString()} kg CO₂e`;}
@@ -317,7 +326,7 @@ async function submit(event){
   renderFunAndSuggestions(fd,res,comp);
 
   safeSetHTML(resultsSummary, `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`);
-  safeSetHTML(assumptions, `Route ${d.toFixed(1)} mi • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`);
+  safeSetHTML(assumptions, `Route ${d.toFixed(1)} mi • System ${(res.buildingSystem || 'all-timber').replace(/-/g, ' ')} • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`);
   } catch (err) {
     safeSetHTML(resultsSummary, `<p><strong>Report generation error:</strong> ${err.message}</p>`);
   }
@@ -364,8 +373,60 @@ btn.cesium.addEventListener('click', ()=>{
 });
 
 btn.pdf.addEventListener('click', async ()=>{
-  const canvas=await html2canvas(document.querySelector('.panel:last-child')); const img=canvas.toDataURL('image/png');
-  const pdf=new window.jspdf.jsPDF('p','mm','a4'); const w=190; const h=(canvas.height*w)/canvas.width; pdf.addImage(img,'PNG',10,10,w,Math.min(h,270)); pdf.save('mass-timber-report.pdf');
+  try {
+    const panel = document.querySelector('.panel:last-child');
+    if (!panel || !window.html2canvas || !window.jspdf?.jsPDF) {
+      safeSetHTML(resultsSummary, '<p><strong>PDF export unavailable:</strong> required export libraries or report panel are missing.</p>');
+      return;
+    }
+
+    const scale = Math.max(2, Math.min(4, window.devicePixelRatio || 2));
+    const canvas = await html2canvas(panel, {
+      backgroundColor: '#ffffff',
+      scale,
+      useCORS: true,
+      logging: false,
+      windowWidth: document.documentElement.scrollWidth,
+      windowHeight: panel.scrollHeight,
+      scrollX: 0,
+      scrollY: -window.scrollY,
+    });
+
+    const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = pdf.internal.pageSize.getHeight();
+    const margin = 8;
+    const usableWidth = pdfWidth - margin * 2;
+    const usableHeight = pdfHeight - margin * 2;
+    const pageHeightPx = (canvas.width * usableHeight) / usableWidth;
+
+    const pageCanvas = document.createElement('canvas');
+    const pageCtx = pageCanvas.getContext('2d');
+    pageCanvas.width = canvas.width;
+
+    let renderedHeight = 0;
+    let page = 0;
+    while (renderedHeight < canvas.height) {
+      const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
+      pageCanvas.height = Math.floor(sliceHeight);
+      pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+      pageCtx.drawImage(canvas, 0, renderedHeight, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
+      const image = pageCanvas.toDataURL('image/png', 1.0);
+
+      if (page > 0) pdf.addPage();
+      const renderedMm = (sliceHeight * usableWidth) / canvas.width;
+      pdf.addImage(image, 'PNG', margin, margin, usableWidth, renderedMm, undefined, 'FAST');
+      renderedHeight += sliceHeight;
+      page += 1;
+    }
+
+    const rawName = String(form.elements.projectName.value || 'mass-timber-report').trim();
+    const fileName = `${rawName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'mass-timber-report'}-report.pdf`;
+    pdf.save(fileName);
+    safeSetHTML(resultsSummary, `<p><strong>PDF exported:</strong> ${fileName}</p>`);
+  } catch (err) {
+    safeSetHTML(resultsSummary, `<p><strong>PDF export failed:</strong> ${err.message}</p>`);
+  }
 });
 
 form.addEventListener('submit', submit);
