@@ -13,6 +13,7 @@ const resultsSummary = document.getElementById('results-summary');
 const reportGrid = document.getElementById('report-grid');
 const assumptions = document.getElementById('assumptions');
 const funFacts = document.getElementById('fun-facts');
+const deepFactsEl = document.getElementById('deep-facts');
 const recommendationsEl = document.getElementById('recommendations');
 const imageryPanel = document.getElementById('imagery-panel');
 const cesiumPanel = document.getElementById('cesium-panel');
@@ -339,10 +340,29 @@ function renderReportGrid(res, compliance) {
 function renderFunAndSuggestions(fd,res,compliance) {
   const pname = fd.get('projectName') || 'Project';
   const btype = fd.get('buildingType');
-  const saved = Math.max(0, res.carbon.steel - res.carbon.timber);
-  const cars = saved / 0.404;
-  const treeYears = saved / 21;
+  const savedVsSteel = Math.max(0, res.carbon.steel - res.carbon.timber);
+  const savedVsConcrete = Math.max(0, res.carbon.concrete - res.carbon.timber);
+  const cars = savedVsSteel / 0.404;
+  const treeYears = savedVsSteel / 21;
+  const steelCostDelta = res.cost.steel - res.cost.timber;
+  const concreteCostDelta = res.cost.concrete - res.cost.timber;
+  const schoolDensity5 = schoolFacts.five / Math.max(res.est.gross / 100000, 1);
+  const schoolDensity10 = schoolFacts.ten / Math.max(res.est.gross / 100000, 1);
+
   safeSetHTML(funFacts, `<strong>Project Fun Facts (${pname})</strong><br>• For this ${btype.replace(/-/g,' ')} scenario, carbon savings vs steel are like avoiding <strong>${Math.round(cars).toLocaleString()}</strong> car miles.<br>• Equivalent to roughly <strong>${Math.round(treeYears).toLocaleString()}</strong> tree-year sequestration credits.<br>• Within 5 miles: <strong>${schoolFacts.five}</strong> public schools; within 10 miles: <strong>${schoolFacts.ten}</strong>.`);
+
+  const insightCards = [
+    { title: 'CARBON ADVANTAGE VS STEEL', detail: `${Math.round(savedVsSteel).toLocaleString()} kgCO₂e lower`, meta: `${((savedVsSteel / Math.max(res.carbon.steel, 1)) * 100).toFixed(1)}% reduction` },
+    { title: 'CARBON ADVANTAGE VS CONCRETE', detail: `${Math.round(savedVsConcrete).toLocaleString()} kgCO₂e lower`, meta: `${((savedVsConcrete / Math.max(res.carbon.concrete, 1)) * 100).toFixed(1)}% reduction` },
+    { title: 'COST POSITION VS STEEL', detail: `${Math.abs(Math.round(steelCostDelta)).toLocaleString()} ${steelCostDelta >= 0 ? 'USD lower' : 'USD higher'}`, meta: `${(Math.abs(steelCostDelta) / Math.max(res.cost.steel, 1) * 100).toFixed(1)}% delta` },
+    { title: 'COST POSITION VS CONCRETE', detail: `${Math.abs(Math.round(concreteCostDelta)).toLocaleString()} ${concreteCostDelta >= 0 ? 'USD lower' : 'USD higher'}`, meta: `${(Math.abs(concreteCostDelta) / Math.max(res.cost.concrete, 1) * 100).toFixed(1)}% delta` },
+    { title: 'LOCAL EDUCATION CONTEXT (5 MI)', detail: `${schoolFacts.five.toLocaleString()} public schools nearby`, meta: `${schoolDensity5.toFixed(1)} schools / 100k ft² benchmark` },
+    { title: 'LOCAL EDUCATION CONTEXT (10 MI)', detail: `${schoolFacts.ten.toLocaleString()} public schools nearby`, meta: `${schoolDensity10.toFixed(1)} schools / 100k ft² benchmark` },
+    { title: 'LOGISTICS INTENSITY', detail: `${res.transportImpact.toFixed(0)} kgCO₂e transport impact`, meta: `${(res.transportImpact / Math.max(Math.abs(res.carbon.timber), 1) * 100).toFixed(1)}% of timber scenario` },
+    { title: 'COMPLIANCE SNAPSHOT', detail: `${compliance.score}/100 score`, meta: compliance.flags.length ? `${compliance.flags.length} issue(s) flagged` : 'No district/code flags detected' },
+  ];
+
+  safeSetHTML(deepFactsEl, `<h3>In-Depth Comparative Facts</h3><div class="deep-fact-grid">${insightCards.map((c) => `<article class="deep-fact-card"><h4>${c.title}</h4><p>${c.detail}</p><small>${c.meta}</small></article>`).join('')}</div>`);
 
   const recs = [];
   if (res.cltShare < 0.55) recs.push('Increase CLT share toward ~55–70% to improve timber carbon performance.');

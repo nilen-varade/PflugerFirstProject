@@ -11,7 +11,7 @@ A professional, architect-friendly conceptual planner for mass-timber carbon and
 - Auto-suggested market-style material costs ($/ft²) based on building type and city cost factor.
 - Added district-style compliance flags (stories/height + preferred code sets) as a practical guideline check layer.
 - Added ArcGIS school proximity facts within **5-mile and 10-mile** radii near project site.
-- Added richer report outputs: compliance/risk chart, expanded KPI/report cards, and design recommendations.
+- Added richer report outputs: compliance/risk chart, expanded KPI/report cards, design recommendations, and a prominent in-depth comparative facts section.
 - Added building-system modeling (all-timber and hybrid assemblies such as steel columns + CLT deck + timber beams) to better reflect mixed-structure projects.
 - Default code selections are pre-populated to 2024-ready options (IBC 2024, IFC 2024, IECC 2024), and Timberlab is pre-selected as default manufacturer.
 - Improved PDF export quality with high-resolution, multi-page rendering and automatic filename based on project name.
