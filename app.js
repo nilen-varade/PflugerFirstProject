@@ -14,6 +14,7 @@ const reportGrid = document.getElementById('report-grid');
 const assumptions = document.getElementById('assumptions');
 const funFacts = document.getElementById('fun-facts');
 const deepFactsEl = document.getElementById('deep-facts');
+const leedFactsEl = document.getElementById('leed-facts');
 const recommendationsEl = document.getElementById('recommendations');
 const imageryPanel = document.getElementById('imagery-panel');
 const cesiumPanel = document.getElementById('cesium-panel');
@@ -337,6 +338,73 @@ function renderReportGrid(res, compliance) {
   safeSetHTML(reportGrid, cards.map(([k,v])=>`<article class="report-card"><p>${k}</p><h4>${v}</h4></article>`).join(''));
 }
 
+
+function renderLeedAegbPriorities(fd, compliance, res) {
+  const cityName = cityData[Number(projectCitySelect.value)]?.name || 'Project City';
+  const localCode = String(fd.get('localCode') || 'None');
+  const energyCode = String(fd.get('energyCode') || 'IECC 2024');
+  const ibcVersion = String(fd.get('ibcVersion') || 'IBC 2024');
+  const type = String(fd.get('buildingType') || 'education').replace(/-/g, ' ');
+  const hasFlags = compliance.flags.length > 0;
+  const hotClimate = /TX|AZ|FL|NV|NM|CA/.test(cityName);
+  const denseSchoolContext = schoolFacts.ten >= 40;
+
+  const priorities = [
+    {
+      title: '1) HIGH-PERFORMANCE ENVELOPE + THERMAL BRIDGING CONTROL',
+      why: `In ${cityName}, envelope optimization typically yields high energy and comfort credit value for ${type} projects under ${energyCode}.`,
+      boost: 'LEED: EA + IEQ | AEGB: Energy + Comfort',
+    },
+    {
+      title: '2) ALL-ELECTRIC HVAC + HEAT RECOVERY WITH SMART CONTROLS',
+      why: `District-grade projects under ${localCode} often gain major points by proving low operational EUI and control readiness.`,
+      boost: 'LEED: EA Optimize Energy Performance',
+    },
+    {
+      title: '3) ON-SITE SOLAR PV + BATTERY PEAK-SHAVING',
+      why: hotClimate ? 'High cooling-season loads make PV + storage especially effective for resilience and utility-demand reduction.' : 'PV + storage supports grid resilience and long-term carbon reduction planning.',
+      boost: 'LEED: EA Renewable Energy Production',
+    },
+    {
+      title: '4) LOW-CARBON CONCRETE + VERIFIED EPD PROCUREMENT',
+      why: 'Combining timber strategy with EPD-backed concrete/steel buyout can materially increase embodied-carbon performance points.',
+      boost: 'LEED: MR Building Product Disclosure & Optimization',
+    },
+    {
+      title: '5) ADVANCED WATER STRATEGY (RAINWATER + LOW-FLOW + IRRIGATION CONTROL)',
+      why: `Water credits are frequently among the most achievable additions for code-compliant school/civic projects in ${cityName}.`,
+      boost: 'LEED: WE Indoor/Outdoor Water Use',
+    },
+    {
+      title: '6) ENHANCED COMMISSIONING + M&V DASHBOARDS',
+      why: hasFlags ? 'Because compliance flags are present, commissioning + M&V helps close documentation gaps and maintain target performance.' : 'Even with strong compliance, commissioning ensures design intent is retained through turnover.',
+      boost: 'LEED: EA Enhanced Commissioning + M&V',
+    },
+    {
+      title: '7) DAYLIGHT, GLARE, AND ACOUSTIC QUALITY OPTIMIZATION',
+      why: `For ${type} occupancy, occupant wellness outcomes are strongly tied to daylight and acoustic performance quality.`,
+      boost: 'LEED: IEQ Daylight/Quality Views/Acoustic Performance',
+    },
+    {
+      title: '8) LOW-EMITTING MATERIALS + CONSTRUCTION IAQ MANAGEMENT',
+      why: 'Material VOC control and IAQ construction planning are high-confidence credit paths that align with district health priorities.',
+      boost: 'LEED: IEQ Low-Emitting Materials + IAQ Plan',
+    },
+    {
+      title: '9) MOBILITY + SITE IMPACT PACKAGE (EV, BIKE, SHADE, HEAT ISLAND)',
+      why: denseSchoolContext ? 'Dense surrounding school context indicates stronger community-impact value from safer low-carbon mobility infrastructure.' : 'Site mobility and heat-island measures improve operations and community-access outcomes.',
+      boost: 'LEED: LT + SS Credit Stack',
+    },
+    {
+      title: '10) DISTRICT/CODE ALIGNMENT WORKSHOP FOR EARLY APPROVALS',
+      why: `Run a joint code workshop against ${ibcVersion}, ${energyCode}, and ${localCode} to lock compliant pathways before DD/CD milestones.`,
+      boost: 'AEGB/Local Green Rating: Process + Compliance Confidence',
+    },
+  ];
+
+  safeSetHTML(leedFactsEl, `<h3>Top 10 LEED / AEGB Point-Maximizing Integrations</h3><p class="leed-note">Subjective priorities tuned to <strong>${cityName}</strong>, <strong>${localCode}</strong>, selected code set, and current compliance/risk profile.</p><ol>${priorities.map((item) => `<li><h4>${item.title}</h4><p>${item.why}</p><small>${item.boost}</small></li>`).join('')}</ol>`);
+}
+
 function renderFunAndSuggestions(fd,res,compliance) {
   const pname = fd.get('projectName') || 'Project';
   const btype = fd.get('buildingType');
@@ -397,6 +465,7 @@ async function submit(event){
   drawCharts(res, comp);
   renderReportGrid(res, comp);
   renderFunAndSuggestions(fd,res,comp);
+  renderLeedAegbPriorities(fd,comp,res);
 
   safeSetHTML(resultsSummary, `<p><strong>${fd.get('projectName')}</strong> modeled at <strong>${Math.round(res.est.gross).toLocaleString()} ft²</strong>.</p><p>Timber carbon <strong>${fmtKg(res.carbon.timber)}</strong>, steel <strong>${fmtKg(res.carbon.steel)}</strong>, concrete <strong>${fmtKg(res.carbon.concrete)}</strong>.</p><p>Timber cost <strong>${fmtMoney(res.cost.timber)}</strong> with market-aligned auto-cost assumptions.</p>${comp.flags.length?`<p><strong>Code flags:</strong> ${comp.flags.join(' ')}</p>`:'<p><strong>Code review:</strong> No district guideline flags detected.</p>'}`);
   safeSetHTML(assumptions, `Route ${d.toFixed(1)} mi • System ${(res.buildingSystem || 'all-timber').replace(/-/g, ' ')} • Complexity ${res.complexity.toFixed(2)} • CLT share ${Math.round(res.cltShare*100)}% • Optional blanks were estimated as needed.`);
