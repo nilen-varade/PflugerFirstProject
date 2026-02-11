@@ -514,6 +514,55 @@ btn.cesium.addEventListener('click', ()=>{
   safeSetHTML(cesiumPanel, `Cesium setup: ${t?'token set':'token missing'} • tiles: ${tiles||'none'} • collada: ${col||'none'}`);
 });
 
+
+function buildPdfSegments(panel) {
+  const segments = [];
+  const pushIf = (el) => { if (el) segments.push(el); };
+
+  pushIf(panel.querySelector('.panel-head'));
+  pushIf(panel.querySelector('#map'));
+  panel.querySelectorAll('.integration-panel, #results-summary, .report-grid, .chart-wrap, #fun-facts, #deep-facts').forEach(pushIf);
+
+  const leedSection = panel.querySelector('#leed-facts');
+  if (leedSection) {
+    pushIf(leedSection.querySelector('h3'));
+    pushIf(leedSection.querySelector('.leed-note'));
+    leedSection.querySelectorAll('ol > li').forEach(pushIf);
+  }
+
+  pushIf(panel.querySelector('#recommendations'));
+  pushIf(panel.querySelector('#assumptions'));
+
+  return segments.filter((el) => el && el.offsetParent !== null);
+}
+
+function addCanvasToPdfPages(pdf, canvas, cfg) {
+  const { margin, usableWidth, usableHeight } = cfg;
+  const pxPerPage = (canvas.width * usableHeight) / usableWidth;
+
+  if (canvas.height <= pxPerPage) {
+    const mmHeight = (canvas.height * usableWidth) / canvas.width;
+    return [{ image: canvas.toDataURL('image/png', 1.0), mmHeight }];
+  }
+
+  const parts = [];
+  const pageCanvas = document.createElement('canvas');
+  const pageCtx = pageCanvas.getContext('2d');
+  pageCanvas.width = canvas.width;
+
+  let offset = 0;
+  while (offset < canvas.height) {
+    const slice = Math.min(pxPerPage, canvas.height - offset);
+    pageCanvas.height = Math.floor(slice);
+    pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+    pageCtx.drawImage(canvas, 0, offset, canvas.width, slice, 0, 0, pageCanvas.width, pageCanvas.height);
+    parts.push({ image: pageCanvas.toDataURL('image/png', 1.0), mmHeight: (slice * usableWidth) / canvas.width });
+    offset += slice;
+  }
+
+  return parts;
+}
+
 btn.pdf.addEventListener('click', async ()=>{
   let restoreLeaflet = () => {};
   try {
@@ -528,49 +577,52 @@ btn.pdf.addEventListener('click', async ()=>{
     restoreLeaflet = normalizeLeafletForCapture();
 
     const scale = Math.max(2, Math.min(4, window.devicePixelRatio || 2));
-    const canvas = await html2canvas(panel, {
-      backgroundColor: '#ffffff',
-      scale,
-      useCORS: true,
-      logging: false,
-      windowWidth: document.documentElement.scrollWidth,
-      windowHeight: panel.scrollHeight,
-      scrollX: 0,
-      scrollY: -window.scrollY,
-    });
-
     const pdf = new window.jspdf.jsPDF('p', 'mm', 'a4');
     const pdfWidth = pdf.internal.pageSize.getWidth();
     const pdfHeight = pdf.internal.pageSize.getHeight();
     const margin = 8;
     const usableWidth = pdfWidth - margin * 2;
     const usableHeight = pdfHeight - margin * 2;
-    const pageHeightPx = (canvas.width * usableHeight) / usableWidth;
+    const gapMm = 2.5;
 
-    const pageCanvas = document.createElement('canvas');
-    const pageCtx = pageCanvas.getContext('2d');
-    pageCanvas.width = canvas.width;
+    const config = { margin, usableWidth, usableHeight };
+    const segments = buildPdfSegments(panel);
+    if (!segments.length) {
+      safeSetHTML(resultsSummary, '<p><strong>PDF export unavailable:</strong> no visible report content found.</p>');
+      return;
+    }
 
-    let renderedHeight = 0;
+    let y = margin;
     let page = 0;
-    while (renderedHeight < canvas.height) {
-      const sliceHeight = Math.min(pageHeightPx, canvas.height - renderedHeight);
-      pageCanvas.height = Math.floor(sliceHeight);
-      pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
-      pageCtx.drawImage(canvas, 0, renderedHeight, canvas.width, sliceHeight, 0, 0, pageCanvas.width, pageCanvas.height);
-      const image = pageCanvas.toDataURL('image/png', 1.0);
 
-      if (page > 0) pdf.addPage();
-      const renderedMm = (sliceHeight * usableWidth) / canvas.width;
-      pdf.addImage(image, 'PNG', margin, margin, usableWidth, renderedMm, undefined, 'FAST');
-      renderedHeight += sliceHeight;
-      page += 1;
+    for (const segment of segments) {
+      const canvas = await html2canvas(segment, {
+        backgroundColor: '#ffffff',
+        scale,
+        useCORS: true,
+        logging: false,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+      });
+
+      const parts = addCanvasToPdfPages(pdf, canvas, config);
+      for (const part of parts) {
+        if (y + part.mmHeight > pdfHeight - margin) {
+          pdf.addPage();
+          page += 1;
+          y = margin;
+        }
+        pdf.addImage(part.image, 'PNG', margin, y, usableWidth, part.mmHeight, `seg-${page}-${y.toFixed(2)}`, 'FAST');
+        y += part.mmHeight + gapMm;
+      }
     }
 
     const rawName = String(form.elements.projectName.value || 'mass-timber-report').trim();
     const fileName = `${rawName.replace(/[^a-z0-9]+/gi, '-').replace(/^-+|-+$/g, '').toLowerCase() || 'mass-timber-report'}-report.pdf`;
     pdf.save(fileName);
-    safeSetHTML(resultsSummary, `<p><strong>PDF exported:</strong> ${fileName}</p>`);
+    safeSetHTML(resultsSummary, `<p><strong>PDF exported:</strong> ${fileName}. Pagination optimized to avoid cut-off content.</p>`);
   } catch (err) {
     safeSetHTML(resultsSummary, `<p><strong>PDF export failed:</strong> ${err.message}</p>`);
   } finally {

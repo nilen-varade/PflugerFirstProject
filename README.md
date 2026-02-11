@@ -14,7 +14,8 @@ A professional, architect-friendly conceptual planner for mass-timber carbon and
 - Added richer report outputs: compliance/risk chart, expanded KPI/report cards, design recommendations, prominent in-depth comparative facts, and a Top 10 LEED/AEGB integration priorities section tuned to city/code/district context.
 - Added building-system modeling (all-timber and hybrid assemblies such as steel columns + CLT deck + timber beams) to better reflect mixed-structure projects.
 - Default code selections are pre-populated to 2024-ready options (IBC 2024, IFC 2024, IECC 2024), and Timberlab is pre-selected as default manufacturer.
-- Improved PDF export quality with high-resolution, multi-page rendering and automatic filename based on project name.
+- Improved PDF export quality with high-resolution, structured multi-page rendering and automatic filename based on project name.
+- Improved PDF pagination logic to reduce cross-page cutoffs and keep report sections readable for client/contractor sharing.
 - Improved Leaflet capture alignment during PDF export so route line/markers stay aligned with the map.
 - Hardened null-safe UI rendering to avoid `Cannot set properties of null` errors and ensure report generation works with limited project input data.
 - Hardened report generation with timeout/error handling so clicking **Generate Designer Report** always returns user feedback even if external APIs are slow/unavailable.
