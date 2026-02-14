@@ -1,57 +1,206 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>For Nandini ❤️</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Great+Vibes&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="styles.css" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#ff4f93" />
+    <title>For Nandini 💖</title>
+    <style>
+      :root {
+        --bg1: #2a0a3a;
+        --bg2: #12051f;
+        --card: rgba(255, 255, 255, 0.12);
+        --text: #fff6fb;
+        --soft: #ffd8ea;
+        --accent: #ff4f93;
+        --accent2: #ffa9cb;
+        --mint: #bafce9;
+      }
+
+      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+      body {
+        margin: 0;
+        min-height: 100svh;
+        font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+        color: var(--text);
+        background:
+          radial-gradient(circle at 20% 10%, rgba(255, 124, 182, 0.35), transparent 40%),
+          radial-gradient(circle at 90% 100%, rgba(140, 255, 224, 0.18), transparent 38%),
+          linear-gradient(160deg, var(--bg1), var(--bg2));
+        display: grid;
+        place-items: center;
+        padding: 14px;
+      }
+
+      .card {
+        width: min(680px, 100%);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 24px;
+        background: var(--card);
+        backdrop-filter: blur(8px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.28);
+        padding: 18px;
+      }
+
+      h1 {
+        margin: 6px 0 4px;
+        line-height: 1.15;
+        font-size: clamp(1.9rem, 7vw, 2.8rem);
+      }
+
+      .tag {
+        margin: 0;
+        color: var(--mint);
+        letter-spacing: .08em;
+        text-transform: uppercase;
+        font-size: .82rem;
+      }
+
+      .lead { margin: 10px 0 16px; color: var(--soft); line-height: 1.45; }
+
+      .q {
+        margin: 0 0 10px;
+        font-size: clamp(1.15rem, 5vw, 1.45rem);
+        font-weight: 700;
+      }
+
+      .choices { display: grid; gap: 10px; }
+
+      button {
+        width: 100%;
+        border: 0;
+        border-radius: 999px;
+        padding: 14px 16px;
+        font-size: 1rem;
+        font-weight: 700;
+        color: #5d0d36;
+        background: linear-gradient(135deg, var(--accent2), #ffd6e8);
+      }
+
+      button:active { transform: scale(0.985); }
+
+      #nextHint { margin-top: 10px; color: #ffd9ea; opacity: 0.9; font-size: .95rem; }
+
+      .hidden { display: none; }
+
+      .surprise p { color: #ffe9f3; line-height: 1.45; }
+
+      .promise {
+        background: rgba(255,255,255,.1);
+        border: 1px solid rgba(255,255,255,.22);
+        border-radius: 14px;
+        padding: 10px 12px;
+        margin: 10px 0;
+      }
+
+      #replay {
+        color: #10342d;
+        background: linear-gradient(135deg, #9ef7df, #d1fff2);
+        margin-top: 6px;
+      }
+
+      .heart {
+        position: fixed;
+        top: -18px;
+        font-size: 20px;
+        pointer-events: none;
+        animation: fall linear forwards;
+      }
+
+      @keyframes fall {
+        to { transform: translateY(112svh) rotate(320deg); opacity: 0; }
+      }
+    </style>
   </head>
   <body>
-    <div class="glow glow-1" aria-hidden="true"></div>
-    <div class="glow glow-2" aria-hidden="true"></div>
-    <main class="card" role="main">
-      <p class="eyebrow">A tiny love game 💌</p>
-      <h1>For my forever favorite, Nandini</h1>
-      <p class="subtext">
-        We’ve loved each other since high school, survived 4 years of long-distance,
-        and now our forever begins in the same home. Ready for a playful romance
-        round?
+    <main class="card">
+      <p class="tag">tiny love game 💌</p>
+      <h1>For Nandini, my forever 💖</h1>
+      <p class="lead">
+        Since high school → 4 years of long-distance → finally home together.
+        Tap through this little romance game, my love.
       </p>
 
-      <section id="questionBox" aria-live="polite">
-        <h2 id="question"></h2>
+      <section id="quiz" aria-live="polite">
+        <h2 id="question" class="q"></h2>
         <div id="choices" class="choices"></div>
       </section>
 
-      <section id="surprise" class="hidden" aria-live="polite">
-        <h2>Surprise unlocked 🎉</h2>
-        <p>
-          Nandini, every call, every message, every countdown to "someday" was
-          worth it.
-        </p>
-        <p>
-          After all these years, I still choose you—on ordinary mornings,
-          sleepy Sundays, and every beautiful day in between.
-        </p>
-        <div class="promise-box">
-          <p>
-            <strong>My forever promise:</strong> I'll keep dating you, teasing you,
-            and loving you wildly even when we’re old and wrinkly. 💞
-          </p>
-        </div>
-        <p class="final-line">Now come collect your 100 kisses coupon 😘</p>
-        <button id="replayBtn" type="button">Play again</button>
+      <section id="surprise" class="surprise hidden" aria-live="polite">
+        <h2 class="q">Surprise unlocked 🎉</h2>
+        <p>Nandini, every wait, every late-night call, every countdown was worth it.</p>
+        <p>After all these years, I still choose you first — every day, every mood, every season.</p>
+        <div class="promise"><strong>Forever promise:</strong> I’ll keep dating you even after we’re old and wrinkly. 💞</div>
+        <p>Come claim your <strong>100 kisses coupon</strong> now 😘</p>
+        <button id="replay" type="button">Play again</button>
       </section>
 
-      <p class="progress"><span id="progressText">Question 1 of 5</span></p>
+      <p id="nextHint">Question 1 of 5</p>
     </main>
 
-    <script src="script.js"></script>
+    <script>
+      const data = [
+        ["Which nickname should I call you right now?", ["My queen 👑", "Cutest troublemaker 😏", "Mrs. Forever 💍"]],
+        ["Our first mini date after moving in?", ["Chai + balcony talks ☕", "Kitchen dance 💃", "Blanket fort movie 🎬"]],
+        ["Which long-distance habit should stay forever?", ["Random voice notes 🎙️", "No-skip goodnight calls 🌙", "Silly selfies spam 📸"]],
+        ["Best high-school us memory?", ["Secret class glances 💞", "After-school chats 🏫", "Our private jokes 😂"]],
+        ["Final one: what are you to me?", ["My home 🏡", "My soulmate ❤️", "Everything. Always. ♾️"]]
+      ];
+
+      const question = document.getElementById('question');
+      const choices = document.getElementById('choices');
+      const quiz = document.getElementById('quiz');
+      const surprise = document.getElementById('surprise');
+      const hint = document.getElementById('nextHint');
+      const replay = document.getElementById('replay');
+      let i = 0;
+
+      function render() {
+        const [q, opts] = data[i];
+        question.textContent = q;
+        choices.innerHTML = '';
+        opts.forEach((opt) => {
+          const b = document.createElement('button');
+          b.textContent = opt;
+          b.type = 'button';
+          b.onclick = next;
+          choices.appendChild(b);
+        });
+        hint.textContent = `Question ${i + 1} of ${data.length}`;
+      }
+
+      function next() {
+        i += 1;
+        if (i < data.length) return render();
+        quiz.classList.add('hidden');
+        surprise.classList.remove('hidden');
+        hint.textContent = 'Forever mode activated 💕';
+        hearts();
+      }
+
+      function hearts() {
+        const icons = ['💖', '💕', '💘', '💞', '💗'];
+        for (let n = 0; n < 28; n++) {
+          const h = document.createElement('span');
+          h.className = 'heart';
+          h.textContent = icons[Math.floor(Math.random() * icons.length)];
+          h.style.left = `${Math.random() * 100}vw`;
+          h.style.animationDuration = `${2.8 + Math.random() * 3.5}s`;
+          h.style.opacity = `${0.45 + Math.random() * .55}`;
+          document.body.appendChild(h);
+          setTimeout(() => h.remove(), 7000);
+        }
+      }
+
+      replay.onclick = () => {
+        i = 0;
+        surprise.classList.add('hidden');
+        quiz.classList.remove('hidden');
+        render();
+      };
+
+      render();
+    </script>
   </body>
 </html>
