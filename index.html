@@ -3,204 +3,312 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-    <meta name="theme-color" content="#ff4f93" />
-    <title>For Nandini 💖</title>
+    <meta name="theme-color" content="#ff2f7f" />
+    <title>Nandini's Valentine Game 💘</title>
     <style>
       :root {
-        --bg1: #2a0a3a;
-        --bg2: #12051f;
-        --card: rgba(255, 255, 255, 0.12);
-        --text: #fff6fb;
+        --bg-1: #2b0837;
+        --bg-2: #13051f;
+        --card: rgba(255, 255, 255, 0.14);
+        --card-strong: rgba(255, 255, 255, 0.2);
+        --txt: #fff8fc;
         --soft: #ffd8ea;
-        --accent: #ff4f93;
-        --accent2: #ffa9cb;
-        --mint: #bafce9;
+        --accent: #ff2f7f;
+        --accent-2: #ff8fbc;
+        --mint: #baffeb;
+        --gold: #ffd36b;
       }
 
-      * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
 
       body {
         margin: 0;
         min-height: 100svh;
-        font-family: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
-        color: var(--text);
+        font-family: "Trebuchet MS", "Segoe UI", system-ui, -apple-system, sans-serif;
+        color: var(--txt);
         background:
-          radial-gradient(circle at 20% 10%, rgba(255, 124, 182, 0.35), transparent 40%),
-          radial-gradient(circle at 90% 100%, rgba(140, 255, 224, 0.18), transparent 38%),
-          linear-gradient(160deg, var(--bg1), var(--bg2));
+          radial-gradient(circle at 15% 10%, rgba(255, 90, 160, 0.4), transparent 40%),
+          radial-gradient(circle at 85% 100%, rgba(186, 255, 235, 0.22), transparent 35%),
+          linear-gradient(160deg, var(--bg-1), var(--bg-2));
         display: grid;
         place-items: center;
         padding: 14px;
+        overflow-x: hidden;
       }
 
-      .card {
-        width: min(680px, 100%);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 24px;
-        background: var(--card);
-        backdrop-filter: blur(8px);
-        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.28);
+      .ambient-heart {
+        position: fixed;
+        font-size: 14px;
+        opacity: 0.2;
+        pointer-events: none;
+        animation: drift 14s linear infinite;
+      }
+
+      @keyframes drift {
+        from { transform: translateY(105svh) translateX(0) rotate(0); }
+        to { transform: translateY(-18svh) translateX(20px) rotate(360deg); }
+      }
+
+      .wrap {
+        width: min(760px, 100%);
+        border-radius: 26px;
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: linear-gradient(145deg, var(--card), rgba(255, 255, 255, 0.08));
+        backdrop-filter: blur(12px);
+        box-shadow: 0 18px 55px rgba(0, 0, 0, 0.35);
         padding: 18px;
+        position: relative;
+      }
+
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(255, 255, 255, 0.16);
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        border-radius: 999px;
+        padding: 6px 12px;
+        font-size: 0.78rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--mint);
       }
 
       h1 {
-        margin: 6px 0 4px;
-        line-height: 1.15;
-        font-size: clamp(1.9rem, 7vw, 2.8rem);
+        margin: 10px 0 8px;
+        line-height: 1.1;
+        font-size: clamp(2rem, 8vw, 3.2rem);
       }
 
-      .tag {
-        margin: 0;
-        color: var(--mint);
-        letter-spacing: .08em;
-        text-transform: uppercase;
-        font-size: .82rem;
+      .lead {
+        margin: 0 0 16px;
+        color: var(--soft);
+        line-height: 1.45;
+        font-size: clamp(0.95rem, 3.8vw, 1.08rem);
       }
 
-      .lead { margin: 10px 0 16px; color: var(--soft); line-height: 1.45; }
+      .status-row {
+        display: grid;
+        gap: 8px;
+        margin-bottom: 14px;
+      }
 
-      .q {
-        margin: 0 0 10px;
-        font-size: clamp(1.15rem, 5vw, 1.45rem);
+      #stepText {
+        color: #ffeaf5;
+        font-size: 0.92rem;
+      }
+
+      .bar {
+        height: 10px;
+        width: 100%;
+        border-radius: 999px;
+        background: rgba(255, 255, 255, 0.16);
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+      }
+
+      .bar > span {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, var(--accent), var(--gold));
+        transition: width 0.35s ease;
+      }
+
+      .question {
         font-weight: 700;
+        font-size: clamp(1.15rem, 5vw, 1.7rem);
+        margin: 0 0 12px;
       }
 
-      .choices { display: grid; gap: 10px; }
+      .grid {
+        display: grid;
+        gap: 10px;
+      }
 
       button {
         width: 100%;
         border: 0;
-        border-radius: 999px;
-        padding: 14px 16px;
+        border-radius: 16px;
+        padding: 14px 14px;
         font-size: 1rem;
         font-weight: 700;
-        color: #5d0d36;
-        background: linear-gradient(135deg, var(--accent2), #ffd6e8);
+        color: #5f0d38;
+        background: linear-gradient(135deg, #ffd2e8, var(--accent-2));
+        box-shadow: 0 8px 18px rgba(255, 110, 170, 0.3);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
       }
 
       button:active { transform: scale(0.985); }
 
-      #nextHint { margin-top: 10px; color: #ffd9ea; opacity: 0.9; font-size: .95rem; }
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 10px 20px rgba(255, 110, 170, 0.38);
+      }
 
       .hidden { display: none; }
 
-      .surprise p { color: #ffe9f3; line-height: 1.45; }
+      .surprise {
+        border: 1px solid rgba(255, 255, 255, 0.25);
+        background: rgba(255, 255, 255, 0.09);
+        border-radius: 18px;
+        padding: 14px;
+      }
+
+      .surprise h2 {
+        margin: 4px 0 8px;
+        font-size: clamp(1.25rem, 5vw, 1.9rem);
+      }
+
+      .surprise p { color: #ffe9f4; line-height: 1.45; margin: 8px 0; }
 
       .promise {
-        background: rgba(255,255,255,.1);
-        border: 1px solid rgba(255,255,255,.22);
-        border-radius: 14px;
-        padding: 10px 12px;
         margin: 10px 0;
+        border-radius: 12px;
+        padding: 10px 12px;
+        border: 1px solid rgba(255, 255, 255, 0.26);
+        background: rgba(255, 255, 255, 0.12);
       }
 
       #replay {
-        color: #10342d;
-        background: linear-gradient(135deg, #9ef7df, #d1fff2);
-        margin-top: 6px;
+        margin-top: 8px;
+        color: #0d3a32;
+        background: linear-gradient(135deg, #9cf8de, #d1fff2);
+        box-shadow: 0 8px 18px rgba(150, 255, 225, 0.28);
       }
 
-      .heart {
+      .fall {
         position: fixed;
-        top: -18px;
-        font-size: 20px;
+        top: -20px;
+        font-size: 22px;
         pointer-events: none;
         animation: fall linear forwards;
       }
 
       @keyframes fall {
-        to { transform: translateY(112svh) rotate(320deg); opacity: 0; }
+        to { transform: translateY(110svh) rotate(320deg); opacity: 0; }
       }
     </style>
   </head>
   <body>
-    <main class="card">
-      <p class="tag">tiny love game 💌</p>
-      <h1>For Nandini, my forever 💖</h1>
+    <main class="wrap">
+      <div class="badge">Valentine Special 💘</div>
+      <h1>Good morning, Nandini 🌹</h1>
       <p class="lead">
-        Since high school → 4 years of long-distance → finally home together.
-        Tap through this little romance game, my love.
+        From high school sweethearts to surviving 4 years long-distance — and now finally home together.
+        Tap through this tiny love adventure I made for you before you wake up in India. 💖
       </p>
 
+      <section class="status-row" aria-label="progress">
+        <div id="stepText">Question 1 of 10</div>
+        <div class="bar"><span id="progressFill"></span></div>
+      </section>
+
       <section id="quiz" aria-live="polite">
-        <h2 id="question" class="q"></h2>
-        <div id="choices" class="choices"></div>
+        <h2 class="question" id="questionText"></h2>
+        <div class="grid" id="choiceGrid"></div>
       </section>
 
       <section id="surprise" class="surprise hidden" aria-live="polite">
-        <h2 class="q">Surprise unlocked 🎉</h2>
-        <p>Nandini, every wait, every late-night call, every countdown was worth it.</p>
-        <p>After all these years, I still choose you first — every day, every mood, every season.</p>
-        <div class="promise"><strong>Forever promise:</strong> I’ll keep dating you even after we’re old and wrinkly. 💞</div>
-        <p>Come claim your <strong>100 kisses coupon</strong> now 😘</p>
-        <button id="replay" type="button">Play again</button>
+        <h2>You unlocked my heart note 💌</h2>
+        <p>Every late-night call, every countdown, every "I miss you" was worth it.</p>
+        <p>After all these years, I still choose you — in every timezone, every morning, every lifetime.</p>
+        <div class="promise"><strong>Forever Valentine promise:</strong> I will keep flirting with you, dating you, and loving you like day one. 💞</div>
+        <p><strong>Reward:</strong> Unlimited hugs + 100 kiss coupon redeemable immediately 😘</p>
+        <button id="replay" type="button">Play again, baby</button>
       </section>
-
-      <p id="nextHint">Question 1 of 5</p>
     </main>
 
     <script>
-      const data = [
-        ["Which nickname should I call you right now?", ["My queen 👑", "Cutest troublemaker 😏", "Mrs. Forever 💍"]],
-        ["Our first mini date after moving in?", ["Chai + balcony talks ☕", "Kitchen dance 💃", "Blanket fort movie 🎬"]],
-        ["Which long-distance habit should stay forever?", ["Random voice notes 🎙️", "No-skip goodnight calls 🌙", "Silly selfies spam 📸"]],
-        ["Best high-school us memory?", ["Secret class glances 💞", "After-school chats 🏫", "Our private jokes 😂"]],
-        ["Final one: what are you to me?", ["My home 🏡", "My soulmate ❤️", "Everything. Always. ♾️"]]
+      const questions = [
+        ["1) Which name should I save you as forever?", ["Wifey Nandini 💍", "My Home ❤️", "Cutest Problem Ever 😘"]],
+        ["2) Pick our first together-living date plan:", ["Balcony chai + sunrise ☕", "Midnight maggi + gossip 🍜", "Slow dance in kitchen 💃"]],
+        ["3) Which long-distance habit should never end?", ["Goodnight calls 🌙", "Random voice notes 🎙️", "Silly selfie attacks 📸"]],
+        ["4) What always melts me about you?", ["Your smile 😊", "Your caring heart 💗", "Everything, honestly ♾️"]],
+        ["5) Who starts fake fights just for attention?", ["You 😌", "Me 😇", "Both drama queens 👑"]],
+        ["6) Our couple superpower is:", ["Patience across miles 🛫", "Laughing at 2AM 😂", "Choosing each other daily 🤍"]],
+        ["7) Ideal lazy Sunday together?", ["Blanket burrito + movies 🎬", "Cooking + stealing bites 🍳", "Naps + forehead kisses 😴"]],
+        ["8) What should I do every day forever?", ["Tell you I love you 💌", "Hold your hand tight 🤝", "Make you laugh nonstop 😍"]],
+        ["9) What are we celebrating this Valentine?", ["Our forever beginning 🌹", "Distance defeated 🏆", "Both, baby 💘"]],
+        ["10) Final question: what are you to me?", ["My peace 🕊️", "My person 💞", "My whole world 🌍"]]
       ];
 
-      const question = document.getElementById('question');
-      const choices = document.getElementById('choices');
+      const questionText = document.getElementById('questionText');
+      const choiceGrid = document.getElementById('choiceGrid');
       const quiz = document.getElementById('quiz');
       const surprise = document.getElementById('surprise');
-      const hint = document.getElementById('nextHint');
+      const stepText = document.getElementById('stepText');
+      const progressFill = document.getElementById('progressFill');
       const replay = document.getElementById('replay');
-      let i = 0;
+      let idx = 0;
 
-      function render() {
-        const [q, opts] = data[i];
-        question.textContent = q;
-        choices.innerHTML = '';
-        opts.forEach((opt) => {
-          const b = document.createElement('button');
-          b.textContent = opt;
-          b.type = 'button';
-          b.onclick = next;
-          choices.appendChild(b);
-        });
-        hint.textContent = `Question ${i + 1} of ${data.length}`;
-      }
-
-      function next() {
-        i += 1;
-        if (i < data.length) return render();
-        quiz.classList.add('hidden');
-        surprise.classList.remove('hidden');
-        hint.textContent = 'Forever mode activated 💕';
-        hearts();
-      }
-
-      function hearts() {
-        const icons = ['💖', '💕', '💘', '💞', '💗'];
-        for (let n = 0; n < 28; n++) {
+      function paintAmbientHearts() {
+        const icons = ['💖', '💕', '💘', '💞'];
+        for (let i = 0; i < 14; i += 1) {
           const h = document.createElement('span');
-          h.className = 'heart';
+          h.className = 'ambient-heart';
           h.textContent = icons[Math.floor(Math.random() * icons.length)];
           h.style.left = `${Math.random() * 100}vw`;
-          h.style.animationDuration = `${2.8 + Math.random() * 3.5}s`;
-          h.style.opacity = `${0.45 + Math.random() * .55}`;
+          h.style.animationDelay = `${Math.random() * 12}s`;
+          h.style.animationDuration = `${12 + Math.random() * 10}s`;
           document.body.appendChild(h);
-          setTimeout(() => h.remove(), 7000);
         }
       }
 
-      replay.onclick = () => {
-        i = 0;
+      function renderQuestion() {
+        const [q, options] = questions[idx];
+        questionText.textContent = q;
+        choiceGrid.innerHTML = '';
+        options.forEach((option) => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.textContent = option;
+          btn.addEventListener('click', nextQuestion);
+          choiceGrid.appendChild(btn);
+        });
+        stepText.textContent = `Question ${idx + 1} of ${questions.length}`;
+        progressFill.style.width = `${((idx + 1) / questions.length) * 100}%`;
+      }
+
+      function nextQuestion() {
+        idx += 1;
+        if (idx < questions.length) {
+          renderQuestion();
+          return;
+        }
+        quiz.classList.add('hidden');
+        surprise.classList.remove('hidden');
+        stepText.textContent = 'Mission complete: Forever Valentine mode 💘';
+        progressFill.style.width = '100%';
+        showerHearts();
+      }
+
+      function showerHearts() {
+        const icons = ['💖', '💕', '💘', '💞', '🌹'];
+        for (let i = 0; i < 34; i += 1) {
+          const heart = document.createElement('span');
+          heart.className = 'fall';
+          heart.textContent = icons[Math.floor(Math.random() * icons.length)];
+          heart.style.left = `${Math.random() * 100}vw`;
+          heart.style.animationDuration = `${2.8 + Math.random() * 3.3}s`;
+          heart.style.opacity = `${0.45 + Math.random() * 0.55}`;
+          document.body.appendChild(heart);
+          setTimeout(() => heart.remove(), 7000);
+        }
+      }
+
+      replay.addEventListener('click', () => {
+        idx = 0;
         surprise.classList.add('hidden');
         quiz.classList.remove('hidden');
-        render();
-      };
+        renderQuestion();
+      });
 
-      render();
+      paintAmbientHearts();
+      renderQuestion();
     </script>
   </body>
 </html>
