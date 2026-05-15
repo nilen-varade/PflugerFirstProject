@@ -1,4 +1,4 @@
-# Pfluger Mass Timber Calculator
+# Mass Timber Carbon Calculator
 
 A professional, architect-friendly conceptual planner for mass-timber carbon and cost comparisons.
 
